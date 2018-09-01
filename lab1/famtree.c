@@ -1,17 +1,3 @@
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "jrb.h"
-#include "fields.h"
-
-typedef struct
-{
-    char  *name;
-    char   sex;
-    char  *father;
-    char  *mother;
-    char **children;
-} Person;
 
 int main(int argc, char **argv)
 {
@@ -24,14 +10,9 @@ int main(int argc, char **argv)
     is = new_inputstruct(argv[1]);
     // Constructs the Red-Black tree
     people = make_jrb();
-    bool subPerson = false;
-    if (is == NULL)
+    if (fillTree(&people, is) < 0)
     {
-        perror("File Open Error: ");
         return -1;
     }
-    while (get_line(is) >= 0)
-    {
-        switch (is->
-    }
+
 }
