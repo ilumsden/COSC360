@@ -31,7 +31,8 @@ Person* new_person()
 Person* new_person_name(const char *pname)
 {
     Person *newPerson = (Person*) malloc(sizeof(Person));
-    newPerson->name = pname;
+    //newPerson->name = pname;
+    strcpy(newPerson->name, pname);
     newPerson->children = (char**) malloc(INIT_CHILDREN * sizeof(char*));
     newPerson->numChildren = 0;
     newPerson->maxChildren = INIT_CHILDREN;
@@ -49,7 +50,7 @@ Person* getChild(JRB people, Person *parent, char *cname)
         }
     }
     Person *child;
-    JRB node = jrb_find_str(peopel, cname);
+    JRB node = jrb_find_str(people, cname);
     if (node == NULL)
     {
         child = new_person_name(cname);
@@ -107,7 +108,7 @@ void addChild(JRB people, Person *parent, char *cname)
 
 Person* getFather(JRB people, Person *child)
 {
-    Person *father
+    Person *father;
     if (child->father != NULL)
     {
         JRB node = jrb_find_str(people, child->father);
@@ -115,7 +116,7 @@ Person* getFather(JRB people, Person *child)
         {
             father = new_person_name(child->father);
             father->sex = 'M';
-            addChild(father, child->name);
+            addChild(people, father, child->name);
             (void*) jrb_insert_str(people, child->father, new_jval_v((void*)father));
         }
         else
@@ -125,7 +126,7 @@ Person* getFather(JRB people, Person *child)
             {
                 father->sex = 'M';
             }
-            addChild(father, child->name);
+            addChild(people, father, child->name);
         }
         return father;
     }
@@ -146,7 +147,7 @@ void setFather(JRB people, Person *child, char **fields, int NF)
 
 Person* getMother(JRB people, Person *child)
 {
-    Person *mother
+    Person *mother;
     if (child->mother != NULL)
     {
         JRB node = jrb_find_str(people, child->mother);
@@ -154,7 +155,7 @@ Person* getMother(JRB people, Person *child)
         {
             mother = new_person_name(child->mother);
             mother->sex = 'F';
-            addChild(mother, child->name);
+            addChild(people, mother, child->name);
             (void*) jrb_insert_str(people, child->mother, new_jval_v((void*)mother));
         }
         else
@@ -164,7 +165,7 @@ Person* getMother(JRB people, Person *child)
             {
                 mother->sex = 'F';
             }
-            addChild(mother, child->name);
+            addChild(people, mother, child->name);
         }
         return mother;
     }
@@ -181,4 +182,9 @@ void setMother(JRB people, Person *child, char **fields, int NF)
     }
     child->mother = pname;
     (void*) getMother(people, child);
+}
+
+void setSex(Person *p, char sex)
+{
+    p->sex = sex;
 }

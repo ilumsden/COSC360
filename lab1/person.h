@@ -38,6 +38,8 @@ extern void setFather(JRB people, Person *child, char **fields, int NF);
 
 extern Person* getMother(JRB people, Person *child);
 
-extern void setMother(JRB peopel, Person *child, char **fields, int NF);
+extern void setMother(JRB people, Person *child, char **fields, int NF);
+
+extern void setSex(Person *p, char sex);
 
 #endif
