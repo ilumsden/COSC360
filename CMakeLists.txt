@@ -6,6 +6,14 @@ enable_language(C)
 option(PERSONAL "Builds the labs for a non-Hydra computer." OFF)
 #option(LAB1 "Build Lab 1." OFF)
 
+if (CMAKE_VERSION VERSION_LESS "3.1")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        set (CMAKE_C_FLAGS "-std=c99 ${CMAKE_C_FLAGS}")
+    endif()
+else()
+    set (CMAKE_C_STANDARD 99)
+endif()
+
 if(PERSONAL)
     file(GLOB fdr_src "${CMAKE_SOURCE_DIR}/libfdr/*.c")
     file(GLOB fdr_headers "${CMAKE_SOURCE_DIR}/libfdr/*.h")
@@ -22,7 +30,6 @@ else()
 endif()
 
 add_executable(famtree ${lab1_src} ${lab1_headers})
-set_property(TARGET famtree PROPERTY C_STANDARD 99)
 
 if(PERSONAL)
     target_link_libraries(famtree PRIVATE fdr)
