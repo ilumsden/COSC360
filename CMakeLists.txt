@@ -22,6 +22,7 @@ else()
 endif()
 
 add_executable(famtree ${lab1_src} ${lab1_headers})
+set_property(TARGET famtree PROPERTY C_STANDARD 99)
 
 if(PERSONAL)
     target_link_libraries(famtree PRIVATE fdr)
