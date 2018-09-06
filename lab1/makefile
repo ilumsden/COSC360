@@ -1,2 +1,2 @@
 all:
-	../hydra.sh lab1
+	cd ..; ./hydra.sh lab1

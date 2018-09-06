@@ -32,7 +32,7 @@ else
     cd build
 fi
 
-cmake -DPERSONAL=ON ..
+cmake ..
 make
 
 mv famtree ../lab1
