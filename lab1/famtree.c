@@ -24,8 +24,10 @@ int main(int argc, char **argv)
             }
             else
             {
-                p = (Person*) jval_v(node->val);
+                //p = (Person*) jval_v(node->val);
+                p = (Person*) node->val.v;
             }
+            free(name);
         }
         else if (strcmp(is->fields[0], "SEX") == 0)
         {
@@ -81,5 +83,11 @@ int main(int argc, char **argv)
         {
             printf("    CHILD %s\n", elem->children[i]);
         }
+    }
+    jrb_rtraverse(per, people)
+    {
+        Person *elem = (Person*) per->val.v;
+        jrb_delete_node(per);
+        destroyPerson(elem);
     }
 }

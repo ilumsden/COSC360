@@ -9,7 +9,7 @@
 #include "fields.h"
 
 #define INIT_CHILDREN 10
-#define MAX_NAME_LENGTH 1024
+#define MAX_NAME_LENGTH 128
 
 void getName(char *name, char **fields, int NF);
 
@@ -41,5 +41,7 @@ extern Person* getMother(JRB people, Person *child);
 extern void setMother(JRB people, Person *child, char **fields, int NF);
 
 extern void setSex(Person *p, char sex);
+
+extern void destroyPerson(Person *p);
 
 #endif
