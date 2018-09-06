@@ -24,9 +24,9 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 if [ -d "./build" ]; then
     cd build
-    if [ -d "./lab1Input" ]; then
-        rm -r lab1Input
-    fi
+    #if [ -d "./lab1Input" ]; then
+    #    rm -r lab1Input
+    #fi
 else
     mkdir build
     cd build
@@ -35,10 +35,12 @@ fi
 cmake -DPERSONAL=ON ..
 make
 
-cd ../$1
+mv famtree ../lab1
 
-if [ -d "./input" ]; then
-    cp -r ./input ../build
-    cd ../build
-    mv input lab1Input
-fi
+#cd ../$1
+
+#if [ -d "./input" ]; then
+#    cp -r ./input ../build
+#    cd ../build
+#    mv input lab1Input
+#fi
