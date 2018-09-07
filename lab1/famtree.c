@@ -4,7 +4,7 @@ int main(int argc, char **argv)
 {
     // Red-Black Tree
     JRB people;
-    Person *p;
+    Person *p = NULL;
     // Input parser
     IS is;
     // Makes the input parser by opening the file from argv[1]
@@ -15,8 +15,15 @@ int main(int argc, char **argv)
     {
         if (strcmp(is->fields[0], "PERSON") == 0)
         {
-            char *name;
-            getName(name, is->fields, is->NF);
+            if (p != NULL)
+            {
+                JRB node = jrb_find_str(people, p->name);
+                if (node == NULL)
+                {
+                    (void*) jrb_insert_str(people, p->name, new_jval_v((void*)p));
+                }
+            }
+            char *name = getName(is->fields, is->NF);
             JRB node = jrb_find_str(people, name);
             if (node == NULL)
             {
@@ -51,9 +58,9 @@ int main(int argc, char **argv)
             {
                 setSex(p, 'M');
             }
-            char *cname;
-            getName(cname, is->fields, is->NF);
+            char *cname = getName(is->fields, is->NF);
             addChild(people, p, cname);
+            free(cname);
         }
         else if (strcmp(is->fields[0], "MOTHER_OF") == 0)
         {
@@ -61,9 +68,9 @@ int main(int argc, char **argv)
             {
                 setSex(p, 'F');
             }
-            char *cname;
-            getName(cname, is->fields, is->NF);
+            char *cname = getName(is->fields, is->NF);
             addChild(people, p, cname);
+            free(cname);
         }
         else
         {
@@ -79,9 +86,12 @@ int main(int argc, char **argv)
         printf("    SEX %c\n", elem->sex);
         printf("    FATHER %s\n", elem->father);
         printf("    MOTHER %s\n", elem->mother);
-        for (int i = 0; i < elem->numChildren; i++)
+        Dllist iter = dll_first(((Person*)per->val.v)->children);
+        Dllist nil = dll_nil(((Person*)per->val.v)->children);
+        while (iter != nil)
         {
-            printf("    CHILD %s\n", elem->children[i]);
+            printf("    CHILD %s\n", ((Person*)iter->val.v)->name);
+            iter = dll_next(iter);
         }
     }
     jrb_rtraverse(per, people)
@@ -90,4 +100,14 @@ int main(int argc, char **argv)
         jrb_delete_node(per);
         destroyPerson(elem);
     }
+    if (jrb_empty(people))
+    {
+        jrb_free_tree(people);
+    }
+    else
+    {
+        perror("Error: people tree should be empty.");
+        return -3;
+    }
+    jettison_inputstruct(is);
 }

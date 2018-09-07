@@ -4,14 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "dllist.h"
 #include "jrb.h"
 #include "jval.h"
 #include "fields.h"
 
-#define INIT_CHILDREN 10
 #define MAX_NAME_LENGTH 128
 
-void getName(char *name, char **fields, int NF);
+extern char* getName(char **fields, int NF);
 
 typedef struct person_t
 {
@@ -19,9 +19,8 @@ typedef struct person_t
     char   sex;
     char  *father;
     char  *mother;
-    char **children;
+    Dllist children;
     int    numChildren;
-    int    maxChildren;
 } Person;
 
 extern Person* new_person();

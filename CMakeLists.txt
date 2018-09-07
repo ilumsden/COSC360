@@ -14,6 +14,8 @@ else()
     set (CMAKE_C_STANDARD 99)
 endif()
 
+set (CMAKE_C_FLAGS "-Wall -g -O ${CMAKE_C_FLAGS}")
+
 if(PERSONAL)
     file(GLOB fdr_src "${CMAKE_SOURCE_DIR}/libfdr/*.c")
     file(GLOB fdr_headers "${CMAKE_SOURCE_DIR}/libfdr/*.h")
