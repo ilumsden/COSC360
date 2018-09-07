@@ -1,6 +1,9 @@
 #ifndef PERSON_H
 #define PERSON_H
 
+// Added to maintain the definition of POSIX functions in C99
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
