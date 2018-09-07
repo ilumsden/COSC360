@@ -7,7 +7,7 @@ char* getName(char **fields, int NF) {
     name[0] = '\0';
     for (int i = 1; i < NF; i++)
     {
-        char *tmp = strdup(fields[i]);
+        char *tmp = (char*) strdup(fields[i]);
         if (i == NF - 1)
         {
             strcat(name, tmp);
