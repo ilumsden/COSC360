@@ -236,6 +236,6 @@ void destroyPerson(Person *p)
     free(p->name);
     free(p->father);
     free(p->mother);
-    free_dllist(p->children);
+    free(p->children);
     free(p);
 }
