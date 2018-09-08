@@ -1,3 +1,0 @@
-[submodule "libfdr"]
-	path = libfdr
-	url = git@github.com:josborn8/libfdr.git
