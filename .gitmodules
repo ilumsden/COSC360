@@ -1,0 +1,3 @@
+[submodule "libfdr"]
+	path = libfdr
+	url = ../../ilumsden/libfdr.git
