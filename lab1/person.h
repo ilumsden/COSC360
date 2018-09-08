@@ -12,6 +12,18 @@
 #include "jval.h"
 #include "fields.h"
 
+inline void* _checkMalloc(void *ptr)
+{
+    if (ptr == NULL)
+    {
+        perror("Error: malloc failed");
+        exit(-5);
+    }
+    return ptr;
+}
+
+#define memChk(p) _checkMalloc(p)
+
 #define MAX_NAME_LENGTH 128
 
 extern char* getName(char **fields, int NF);

@@ -13,7 +13,11 @@ int main(int argc, char **argv)
     people = make_jrb();
     while (get_line(is) >= 0)
     {
-        if (strcmp(is->fields[0], "PERSON") == 0)
+        if (is->NF == 0)
+        {
+            continue;
+        }
+        else if (strcmp(is->fields[0], "PERSON") == 0)
         {
             if (p != NULL)
             {
@@ -79,8 +83,13 @@ int main(int argc, char **argv)
         }
     }
     JRB per;
+    JRB nil = jrb_nil(people);
     jrb_traverse(per, people)
     {
+        if (per == nil)
+        {
+            continue;
+        }
         Person *elem = (Person*) per->val.v;
         printf("PERSON %s\n", elem->name);
         printf("    SEX %c\n", elem->sex);
@@ -97,17 +106,8 @@ int main(int argc, char **argv)
     jrb_rtraverse(per, people)
     {
         Person *elem = (Person*) per->val.v;
-        jrb_delete_node(per);
         destroyPerson(elem);
     }
-    if (jrb_empty(people))
-    {
-        jrb_free_tree(people);
-    }
-    else
-    {
-        perror("Error: people tree should be empty.");
-        return -3;
-    }
+    jrb_free_tree(people);
     jettison_inputstruct(is);
 }
