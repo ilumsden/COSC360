@@ -193,7 +193,7 @@ void setFather(JRB people, Person *child, char **fields, int NF, int iline)
     if (strcmp(child->father, "") != 0 && strcmp(child->father, pname) != 0)
     {
         errno = EBADFATHER;
-        fprintf(stderr, "Bad Input -- child with two fathers on line %d\n", iline);
+        fprintf(stderr, "Bad Input -- child with two fathers on line %d\n\n", iline);
         exit(-1);
     }
     strcpy(child->father, pname);
@@ -237,7 +237,7 @@ void setMother(JRB people, Person *child, char **fields, int NF, int iline)
     if (strcmp(child->mother, "") != 0 && strcmp(child->mother, pname) != 0)
     {
         errno = EBADMOTHER;
-        fprintf(stderr, "Bad input -- child with two mothers on line %d\n", iline);
+        fprintf(stderr, "Bad input -- child with two mothers on line %d\n\n", iline);
         exit(-1);
     }
     strcpy(child->mother, pname);
@@ -257,7 +257,7 @@ void setSex(Person *p, char sex, int iline)
         if (p->sex != sex)
         {
             errno = EGENDERFORCE;
-            fprintf(stderr, "Bad input - sex mismatch on line %d\n", iline);
+            fprintf(stderr, "Bad input - sex mismatch on line %d\n\n", iline);
             exit(-1);
         }
     }
@@ -356,7 +356,7 @@ void cycleCheck(JRB people)
         if (isDescendant(person))
         {
             errno = EDESCENDANTCYCLE;
-            fprintf(stderr, "Bad input -- cycle in specification\n");
+            fprintf(stderr, "Bad input -- cycle in specification\n\n");
             exit(-1);
         }
     }
