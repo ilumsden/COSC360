@@ -24,7 +24,7 @@ inline void* _checkMalloc(void *ptr)
 
 #define memChk(p) _checkMalloc(p)
 
-#define MAX_NAME_LENGTH 128
+#define MAX_NAME_LENGTH 1024
 
 extern char* getName(char **fields, int NF);
 

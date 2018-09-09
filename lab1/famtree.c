@@ -91,17 +91,51 @@ int main(int argc, char **argv)
             continue;
         }
         Person *elem = (Person*) per->val.v;
-        printf("PERSON %s\n", elem->name);
-        printf("    SEX %c\n", elem->sex);
-        printf("    FATHER %s\n", elem->father);
-        printf("    MOTHER %s\n", elem->mother);
+        printf("%s\n", elem->name);
+        if (elem->sex == 'M')
+        {
+            printf("  Sex: Male\n");
+        }
+        else if (elem->sex == 'F')
+        {
+            printf("  Sex: Female\n");
+        }
+        else
+        {
+            printf("  Sex: Unknown\n");
+        }
+        if (strcmp(elem->father, "") == 0)
+        {
+            printf("  Father: Unknown\n");
+        }
+        else
+        {
+            printf("  Father: %s\n", elem->father);
+        }
+        if (strcmp(elem->mother, "") == 0)
+        {
+            printf("  Mother: Unknown\n");
+        }
+        else
+        {
+            printf("  Mother: %s\n", elem->mother);
+        }
         Dllist iter = dll_first(((Person*)per->val.v)->children);
         Dllist nil = dll_nil(((Person*)per->val.v)->children);
-        while (iter != nil)
+        if (iter == nil)
         {
-            printf("    CHILD %s\n", ((Person*)iter->val.v)->name);
-            iter = dll_next(iter);
+            printf("  Children: None\n");
         }
+        else
+        {
+            printf("  Children:\n");
+            while (iter != nil)
+            {
+                printf("    %s\n", ((Person*)iter->val.v)->name);
+                iter = dll_next(iter);
+            }
+        }
+        printf("\n");
     }
     jrb_rtraverse(per, people)
     {

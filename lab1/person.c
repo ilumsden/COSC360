@@ -16,6 +16,7 @@ char* getName(char **fields, int NF) {
         else if (i == 1)
         {
             strcpy(name, tmp);
+            strcat(name, " ");
         }
         else if (i == NF - 1)
         {
@@ -172,7 +173,7 @@ Person* getFather(JRB people, Person *child)
             //father = (Person*) jval_v(node->val);
             if (father->sex != 'M')
             {
-                father->sex = 'M';
+                setSex(father, 'M');
             }
             addChild(people, father, child->name);
         }
@@ -184,10 +185,16 @@ Person* getFather(JRB people, Person *child)
 void setFather(JRB people, Person *child, char **fields, int NF)
 {
     char *pname = getName(fields, NF);
-    /*if (strcmp(child->father, pname) == 0)
+    if (strcmp(child->father, "") != 0 && strcmp(child->father, pname) != 0)
     {
-        return;
-    }*/
+        perror("Error: that's not this person's father!");
+        exit(-5);
+    }
+    if (strcmp(child->mother, pname) == 0)
+    {
+        perror("Error: a person can't be someone's mother and father.");
+        exit(-5);
+    }
     strcpy(child->father, pname);
     //child->father = strdup(pname);
     (void*) getFather(people, child);
@@ -213,7 +220,7 @@ Person* getMother(JRB people, Person *child)
             //mother = (Person*) jval_v(node->val);
             if (mother->sex != 'F')
             {
-                mother->sex = 'F';
+                setSex(mother, 'F');
             }
             addChild(people, mother, child->name);
         }
@@ -225,10 +232,16 @@ Person* getMother(JRB people, Person *child)
 void setMother(JRB people, Person *child, char **fields, int NF)
 {
     char *pname = getName(fields, NF);
-    /*if (strcmp(child->mother, pname) == 0)
+    if (strcmp(child->mother, "") != 0 && strcmp(child->mother, pname) != 0)
     {
-        return;
-    }*/
+        perror("Error: that's not this person's mother!");
+        exit(-5);
+    }
+    if (strcmp(child->father, pname) == 0)
+    {
+        perror("Error: a person can't be someone's mother and father.");
+        exit(-5);
+    }
     strcpy(child->mother, pname);
     //child->mother = strdup(pname);
     (void*) getMother(people, child);
@@ -237,7 +250,18 @@ void setMother(JRB people, Person *child, char **fields, int NF)
 
 void setSex(Person *p, char sex)
 {
-    p->sex = sex;
+    if (p->sex == 0)
+    {
+        p->sex = sex;
+    }
+    else
+    {
+        if (p->sex != sex)
+        {
+            perror("Error: you shouldn't force a gender on someone.");
+            exit(-5);
+        }
+    }
 }
 
 void destroyPerson(Person *p)
