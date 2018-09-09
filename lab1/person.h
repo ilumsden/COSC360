@@ -59,15 +59,15 @@ extern Person* getChild(JRB people, Person *parent, char *cname);
 
 extern void addChild(JRB people, Person *parent, char *cname);
 
-extern Person* getFather(JRB people, Person *child);
+extern Person* getFather(JRB people, Person *child, int iline);
 
-extern void setFather(JRB people, Person *child, char **fields, int NF);
+extern void setFather(JRB people, Person *child, char **fields, int NF, int iline);
 
-extern Person* getMother(JRB people, Person *child);
+extern Person* getMother(JRB people, Person *child, int iline);
 
-extern void setMother(JRB people, Person *child, char **fields, int NF);
+extern void setMother(JRB people, Person *child, char **fields, int NF, int iline);
 
-extern void setSex(Person *p, char sex);
+extern void setSex(Person *p, char sex, int iline);
 
 extern void printPerson(Person *p);
 
