@@ -126,7 +126,6 @@ int main(int argc, char **argv)
         else
         {
             fprintf(stderr, "3: Unknown key: %s\n", is->fields[0]);
-            fprintf(stderr, "\n");
             return -1;
         }
     }

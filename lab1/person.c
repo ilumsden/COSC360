@@ -194,7 +194,6 @@ void setFather(JRB people, Person *child, char **fields, int NF, int iline)
     {
         errno = EBADFATHER;
         fprintf(stderr, "Bad Input -- child with two fathers on line %d\n", iline);
-        fprintf(stderr, "\n");
         exit(-1);
     }
     strcpy(child->father, pname);
@@ -239,7 +238,6 @@ void setMother(JRB people, Person *child, char **fields, int NF, int iline)
     {
         errno = EBADMOTHER;
         fprintf(stderr, "Bad input -- child with two mothers on line %d\n", iline);
-        fprintf(stderr, "\n");
         exit(-1);
     }
     strcpy(child->mother, pname);
@@ -260,7 +258,6 @@ void setSex(Person *p, char sex, int iline)
         {
             errno = EGENDERFORCE;
             fprintf(stderr, "Bad input - sex mismatch on line %d\n", iline);
-            fprintf(stderr, "\n");
             exit(-1);
         }
     }
@@ -360,7 +357,6 @@ void cycleCheck(JRB people)
         {
             errno = EDESCENDANTCYCLE;
             fprintf(stderr, "Bad input -- cycle in specification\n");
-            fprintf(stderr, "\n");
             exit(-1);
         }
     }
