@@ -158,7 +158,7 @@ void addChild(JRB people, Person *parent, char *cname)
     parent->numChildren++;
 }
 
-Person* getFather(JRB people, Person *child)
+Person* getFather(JRB people, Person *child, int iline)
 {
     Person *father;
     if (strcmp(child->father, "") != 0)
@@ -168,7 +168,7 @@ Person* getFather(JRB people, Person *child)
         {
             father = new_person_name(child->father);
             //father->sex = 'M';
-            setSex(father, 'M');
+            setSex(father, 'M', iline);
             addChild(people, father, child->name);
             (void*) jrb_insert_str(people, child->father, new_jval_v((void*)father));
         }
@@ -178,7 +178,7 @@ Person* getFather(JRB people, Person *child)
             //father = (Person*) jval_v(node->val);
             if (father->sex != 'M')
             {
-                setSex(father, 'M');
+                setSex(father, 'M', iline);
             }
             addChild(people, father, child->name);
         }
@@ -193,16 +193,16 @@ void setFather(JRB people, Person *child, char **fields, int NF, int iline)
     if (strcmp(child->father, "") != 0 && strcmp(child->father, pname) != 0)
     {
         errno = EBADFATHER;
-        perror("Bad Input -- child with two fathers on line %d", iline);
+        fprintf(stderr, "Bad Input -- child with two fathers on line %d", iline);
         exit(-1);
     }
     strcpy(child->father, pname);
     //child->father = strdup(pname);
-    (void*) getFather(people, child);
+    (void*) getFather(people, child, iline);
     free(pname);
 }
 
-Person* getMother(JRB people, Person *child)
+Person* getMother(JRB people, Person *child, int iline)
 {
     Person *mother;
     if (strcmp(child->mother, "") != 0)
@@ -212,7 +212,7 @@ Person* getMother(JRB people, Person *child)
         {
             mother = new_person_name(child->mother);
             //mother->sex = 'F';
-            setSex(mother, 'F');
+            setSex(mother, 'F', iline);
             addChild(people, mother, child->name);
             (void*) jrb_insert_str(people, child->mother, new_jval_v((void*)mother));
         }
@@ -222,7 +222,7 @@ Person* getMother(JRB people, Person *child)
             //mother = (Person*) jval_v(node->val);
             if (mother->sex != 'F')
             {
-                setSex(mother, 'F');
+                setSex(mother, 'F', iline);
             }
             addChild(people, mother, child->name);
         }
@@ -237,12 +237,12 @@ void setMother(JRB people, Person *child, char **fields, int NF, int iline)
     if (strcmp(child->mother, "") != 0 && strcmp(child->mother, pname) != 0)
     {
         errno = EBADMOTHER;
-        perror("Bad input -- child with two mothers on line %d", iline);
+        fprintf(stderr, "Bad input -- child with two mothers on line %d", iline);
         exit(-1);
     }
     strcpy(child->mother, pname);
     //child->mother = strdup(pname);
-    (void*) getMother(people, child);
+    (void*) getMother(people, child, iline);
     free(pname);
 }
 
@@ -257,7 +257,7 @@ void setSex(Person *p, char sex, int iline)
         if (p->sex != sex)
         {
             errno = EGENDERFORCE;
-            perror("Bad input - sex mismatch on line %d", iline);
+            fprintf(stderr, "Bad input - sex mismatch on line %d", iline);
             exit(-1);
         }
     }
@@ -356,7 +356,7 @@ void cycleCheck(JRB people)
         if (isDescendant(person))
         {
             errno = EDESCENDANTCYCLE;
-            perror("Bad input -- cycle in specification\n");
+            fprintf(stderr, "Bad input -- cycle in specification\n");
             exit(-1);
         }
     }

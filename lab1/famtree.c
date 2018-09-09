@@ -30,9 +30,9 @@ void printFamtree(JRB people)
         if (!p->printed)
         {
             if ((strcmp(p->father, "") == 0 && strcmp(p->mother, "") == 0) ||
-                (strcmp(p->father, "") == 0 && getMother(people, p)->printed) ||
-                (getFather(people, p)->printed && strcmp(p->mother, "") == 0) ||
-                (getFather(people, p)->printed && getMother(people, p)->printed))
+                (strcmp(p->father, "") == 0 && getMother(people, p, 0)->printed) ||
+                (getFather(people, p, 0)->printed && strcmp(p->mother, "") == 0) ||
+                (getFather(people, p, 0)->printed && getMother(people, p, 0)->printed))
             {
                 printPerson(p);
                 p->printed = 1;
@@ -93,21 +93,21 @@ int main(int argc, char **argv)
         else if (strcmp(is->fields[0], "SEX") == 0)
         {
             char sex = *(is->fields[1]);
-            setSex(p, sex);
+            setSex(p, sex, is->line);
         }
         else if (strcmp(is->fields[0], "FATHER") == 0)
         {
-            setFather(people, p, is->fields, is->NF);
+            setFather(people, p, is->fields, is->NF, is->iline);
         }
         else if (strcmp(is->fields[0], "MOTHER") == 0)
         {
-            setMother(people, p, is->fields, is->NF);
+            setMother(people, p, is->fields, is->NF, is->iline);
         }
         else if (strcmp(is->fields[0], "FATHER_OF") == 0)
         {
             if (p->sex != 'M')
             {
-                setSex(p, 'M');
+                setSex(p, 'M', is->line);
             }
             char *cname = getName(is->fields, is->NF);
             addChild(people, p, cname);
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
         {
             if (p->sex != 'F')
             {
-                setSex(p, 'F');
+                setSex(p, 'F', is->line);
             }
             char *cname = getName(is->fields, is->NF);
             addChild(people, p, cname);
