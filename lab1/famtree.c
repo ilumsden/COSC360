@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     // Input parser
     IS is;
     // Makes the input parser by opening the file from argv[1]
-    is = new_inputstruct(argv[1]);
+    is = new_inputstruct(NULL);
     // Constructs the Red-Black tree
     people = make_jrb();
     while (get_line(is) >= 0)
