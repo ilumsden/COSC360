@@ -51,18 +51,7 @@ Person* new_person()
 Person* new_person_name(const char *pname)
 {
     Person* newPerson = new_person();
-    /*Person *newPerson = (Person*) memChk(malloc(sizeof(Person)));
-    newPerson->name = (char*) memChk(malloc(MAX_NAME_LENGTH));
-    newPerson->name[0] = 0;*/
     strcpy(newPerson->name, pname);
-    /*newPerson->father = (char*) memChk(malloc(MAX_NAME_LENGTH*sizeof(char)));
-    newPerson->father[0] = 0;
-    newPerson->mother = (char*) memChk(malloc(MAX_NAME_LENGTH*sizeof(char)));
-    newPerson->mother[0] = 0;
-    newPerson->children = new_dllist();
-    newPerson->numChildren = 0;
-    newPerson->sex = 0;
-    newPerson->visited = 0;*/
     return newPerson;
 }
 
@@ -94,19 +83,16 @@ Person* getChild(JRB people, Person *parent, char *cname)
         if (parent->sex == 'M')
         {
             strcpy(child->father, parent->name);
-            //child->father = parent->name;
         }
         else if (parent->sex == 'F')
         {
             strcpy(child->mother, parent->name);
-            //child->mother = parent->name;
         }
         (void*) jrb_insert_str(people, child->name, new_jval_v((void*)child));
     }
     else
     {
         child = (Person*) node->val.v;
-        //child = (Person*) jval_v(node->val);
     }
     return child;
 }
@@ -131,12 +117,10 @@ void addChild(JRB people, Person *parent, char *cname)
         if (parent->sex == 'M')
         {
             strcpy(child->father, parent->name);
-            //child->father = parent->name;
         }
         else if (parent->sex == 'F')
         {
             strcpy(child->mother, parent->name);
-            //child->mother = parent->name;
         }
         (void*) jrb_insert_str(people, child->name, new_jval_v((void*)child));
     }
@@ -146,12 +130,10 @@ void addChild(JRB people, Person *parent, char *cname)
         if (parent->sex == 'M')
         {
             strcpy(child->father, parent->name);
-            //child->father = parent->name;
         }
         else if (parent->sex == 'F')
         {
             strcpy(child->mother, parent->name);
-            //child->mother = parent->name;
         }
     }
     dll_append(parent->children, new_jval_v((void*)child));
@@ -167,7 +149,6 @@ Person* getFather(JRB people, Person *child, int iline)
         if (node == NULL)
         {
             father = new_person_name(child->father);
-            //father->sex = 'M';
             setSex(father, 'M', iline);
             addChild(people, father, child->name);
             (void*) jrb_insert_str(people, child->father, new_jval_v((void*)father));
@@ -175,7 +156,6 @@ Person* getFather(JRB people, Person *child, int iline)
         else
         {
             father = (Person*) node->val.v;
-            //father = (Person*) jval_v(node->val);
             if (father->sex != 'M')
             {
                 setSex(father, 'M', iline);
@@ -197,7 +177,6 @@ void setFather(JRB people, Person *child, char **fields, int NF, int iline)
         exit(-1);
     }
     strcpy(child->father, pname);
-    //child->father = strdup(pname);
     (void*) getFather(people, child, iline);
     free(pname);
 }
@@ -211,7 +190,6 @@ Person* getMother(JRB people, Person *child, int iline)
         if (node == NULL)
         {
             mother = new_person_name(child->mother);
-            //mother->sex = 'F';
             setSex(mother, 'F', iline);
             addChild(people, mother, child->name);
             (void*) jrb_insert_str(people, child->mother, new_jval_v((void*)mother));
@@ -219,7 +197,6 @@ Person* getMother(JRB people, Person *child, int iline)
         else
         {
             mother = (Person*) node->val.v;
-            //mother = (Person*) jval_v(node->val);
             if (mother->sex != 'F')
             {
                 setSex(mother, 'F', iline);
@@ -241,7 +218,6 @@ void setMother(JRB people, Person *child, char **fields, int NF, int iline)
         exit(-1);
     }
     strcpy(child->mother, pname);
-    //child->mother = strdup(pname);
     (void*) getMother(people, child, iline);
     free(pname);
 }
@@ -318,7 +294,6 @@ void destroyPerson(Person *p)
     free(p->father);
     free(p->mother);
     free_dllist(p->children);
-    //free(p->children);
     free(p);
 }
 

@@ -1,2 +1,2 @@
 all:
-	cd ..; ./hydra.sh lab1
+	rm -rf build; mkdir build; cd build; cmake ..; make;

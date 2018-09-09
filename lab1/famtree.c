@@ -85,7 +85,6 @@ int main(int argc, char **argv)
             }
             else
             {
-                //p = (Person*) jval_v(node->val);
                 p = (Person*) node->val.v;
             }
             free(name);
@@ -130,61 +129,6 @@ int main(int argc, char **argv)
         }
     }
     cycleCheck(people);
-    /*JRB per;
-    JRB nil = jrb_nil(people);
-    jrb_traverse(per, people)
-    {
-        if (per == nil)
-        {
-            continue;
-        }
-        Person *elem = (Person*) per->val.v;
-        printf("%s\n", elem->name);
-        if (elem->sex == 'M')
-        {
-            printf("  Sex: Male\n");
-        }
-        else if (elem->sex == 'F')
-        {
-            printf("  Sex: Female\n");
-        }
-        else
-        {
-            printf("  Sex: Unknown\n");
-        }
-        if (strcmp(elem->father, "") == 0)
-        {
-            printf("  Father: Unknown\n");
-        }
-        else
-        {
-            printf("  Father: %s\n", elem->father);
-        }
-        if (strcmp(elem->mother, "") == 0)
-        {
-            printf("  Mother: Unknown\n");
-        }
-        else
-        {
-            printf("  Mother: %s\n", elem->mother);
-        }
-        Dllist iter = dll_first(((Person*)per->val.v)->children);
-        Dllist nil = dll_nil(((Person*)per->val.v)->children);
-        if (iter == nil)
-        {
-            printf("  Children: None\n");
-        }
-        else
-        {
-            printf("  Children:\n");
-            while (iter != nil)
-            {
-                printf("    %s\n", ((Person*)iter->val.v)->name);
-                iter = dll_next(iter);
-            }
-        }
-        printf("\n");
-    }*/
     printFamtree(people);
     JRB per;
     jrb_rtraverse(per, people)
