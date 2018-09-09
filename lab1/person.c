@@ -187,19 +187,13 @@ Person* getFather(JRB people, Person *child)
     return NULL;
 }
 
-void setFather(JRB people, Person *child, char **fields, int NF)
+void setFather(JRB people, Person *child, char **fields, int NF, int iline)
 {
     char *pname = getName(fields, NF);
     if (strcmp(child->father, "") != 0 && strcmp(child->father, pname) != 0)
     {
         errno = EBADFATHER;
-        perror("Error: that's not this person's father!");
-        exit(-1);
-    }
-    if (strcmp(child->mother, pname) == 0)
-    {
-        errno = EMULTIPARENT;
-        perror("Error: a person can't be someone's mother and father.");
+        perror("Bad Input -- child with two fathers on line %d", iline);
         exit(-1);
     }
     strcpy(child->father, pname);
@@ -237,19 +231,13 @@ Person* getMother(JRB people, Person *child)
     return NULL;
 }
 
-void setMother(JRB people, Person *child, char **fields, int NF)
+void setMother(JRB people, Person *child, char **fields, int NF, int iline)
 {
     char *pname = getName(fields, NF);
     if (strcmp(child->mother, "") != 0 && strcmp(child->mother, pname) != 0)
     {
         errno = EBADMOTHER;
-        perror("Error: that's not this person's mother!");
-        exit(-1);
-    }
-    if (strcmp(child->father, pname) == 0)
-    {
-        errno = EMULTIPARENT;
-        perror("Error: a person can't be someone's mother and father.");
+        perror("Bad input -- child with two mothers on line %d", iline);
         exit(-1);
     }
     strcpy(child->mother, pname);
@@ -258,7 +246,7 @@ void setMother(JRB people, Person *child, char **fields, int NF)
     free(pname);
 }
 
-void setSex(Person *p, char sex)
+void setSex(Person *p, char sex, int iline)
 {
     if (p->sex == 0)
     {
@@ -269,7 +257,7 @@ void setSex(Person *p, char sex)
         if (p->sex != sex)
         {
             errno = EGENDERFORCE;
-            perror("Error: you shouldn't force a gender on someone.");
+            perror("Bad input - sex mismatch on line %d", iline);
             exit(-1);
         }
     }
@@ -368,7 +356,7 @@ void cycleCheck(JRB people)
         if (isDescendant(person))
         {
             errno = EDESCENDANTCYCLE;
-            perror("Error: a person cannot be their own descendant!");
+            perror("Bad input -- cycle in specification\n");
             exit(-1);
         }
     }

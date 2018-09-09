@@ -125,7 +125,7 @@ int main(int argc, char **argv)
         }
         else
         {
-            perror("Error: Invalid Specifier");
+            perror("3: Unknown key: %s", is->fields[0]);
             return -1;
         }
     }
