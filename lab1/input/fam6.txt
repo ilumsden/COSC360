@@ -1,0 +1,5 @@
+PERSON Bob
+  FATHER_OF Frank
+
+PERSON Frank
+  FATHER_OF Bob

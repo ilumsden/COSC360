@@ -2,7 +2,6 @@
 
 #include <stdbool.h>
 
-
 char* getName(char **fields, int NF) {
     char *name = (char*) memChk(malloc(MAX_NAME_LENGTH*sizeof(char)));
     name[0] = 0;
@@ -44,22 +43,26 @@ Person* new_person()
     newPerson->children = new_dllist();
     newPerson->numChildren = 0;
     newPerson->sex = 0;
+    newPerson->visited = 0;
+    newPerson->printed = 0;
     return newPerson;
 }
 
 Person* new_person_name(const char *pname)
 {
-    Person *newPerson = (Person*) memChk(malloc(sizeof(Person)));
+    Person* newPerson = new_person();
+    /*Person *newPerson = (Person*) memChk(malloc(sizeof(Person)));
     newPerson->name = (char*) memChk(malloc(MAX_NAME_LENGTH));
-    newPerson->name[0] = 0;
+    newPerson->name[0] = 0;*/
     strcpy(newPerson->name, pname);
-    newPerson->father = (char*) memChk(malloc(MAX_NAME_LENGTH*sizeof(char)));
+    /*newPerson->father = (char*) memChk(malloc(MAX_NAME_LENGTH*sizeof(char)));
     newPerson->father[0] = 0;
     newPerson->mother = (char*) memChk(malloc(MAX_NAME_LENGTH*sizeof(char)));
     newPerson->mother[0] = 0;
     newPerson->children = new_dllist();
     newPerson->numChildren = 0;
     newPerson->sex = 0;
+    newPerson->visited = 0;*/
     return newPerson;
 }
 
@@ -79,8 +82,9 @@ Person* getChild(JRB people, Person *parent, char *cname)
     }
     if (!hasChild)
     {
+        errno = EBADCHILD;
         perror("Error: that's not this person's child!");
-        exit(-3);
+        exit(-1);
     }
     Person *child;
     JRB node = jrb_find_str(people, cname);
@@ -157,13 +161,14 @@ void addChild(JRB people, Person *parent, char *cname)
 Person* getFather(JRB people, Person *child)
 {
     Person *father;
-    if (child->father != NULL)
+    if (strcmp(child->father, "") != 0)
     {
         JRB node = jrb_find_str(people, child->father);
         if (node == NULL)
         {
             father = new_person_name(child->father);
-            father->sex = 'M';
+            //father->sex = 'M';
+            setSex(father, 'M');
             addChild(people, father, child->name);
             (void*) jrb_insert_str(people, child->father, new_jval_v((void*)father));
         }
@@ -187,13 +192,15 @@ void setFather(JRB people, Person *child, char **fields, int NF)
     char *pname = getName(fields, NF);
     if (strcmp(child->father, "") != 0 && strcmp(child->father, pname) != 0)
     {
+        errno = EBADFATHER;
         perror("Error: that's not this person's father!");
-        exit(-5);
+        exit(-1);
     }
     if (strcmp(child->mother, pname) == 0)
     {
+        errno = EMULTIPARENT;
         perror("Error: a person can't be someone's mother and father.");
-        exit(-5);
+        exit(-1);
     }
     strcpy(child->father, pname);
     //child->father = strdup(pname);
@@ -204,13 +211,14 @@ void setFather(JRB people, Person *child, char **fields, int NF)
 Person* getMother(JRB people, Person *child)
 {
     Person *mother;
-    if (child->mother != NULL)
+    if (strcmp(child->mother, "") != 0)
     {
         JRB node = jrb_find_str(people, child->mother);
         if (node == NULL)
         {
             mother = new_person_name(child->mother);
-            mother->sex = 'F';
+            //mother->sex = 'F';
+            setSex(mother, 'F');
             addChild(people, mother, child->name);
             (void*) jrb_insert_str(people, child->mother, new_jval_v((void*)mother));
         }
@@ -234,13 +242,15 @@ void setMother(JRB people, Person *child, char **fields, int NF)
     char *pname = getName(fields, NF);
     if (strcmp(child->mother, "") != 0 && strcmp(child->mother, pname) != 0)
     {
+        errno = EBADMOTHER;
         perror("Error: that's not this person's mother!");
-        exit(-5);
+        exit(-1);
     }
     if (strcmp(child->father, pname) == 0)
     {
+        errno = EMULTIPARENT;
         perror("Error: a person can't be someone's mother and father.");
-        exit(-5);
+        exit(-1);
     }
     strcpy(child->mother, pname);
     //child->mother = strdup(pname);
@@ -258,10 +268,60 @@ void setSex(Person *p, char sex)
     {
         if (p->sex != sex)
         {
+            errno = EGENDERFORCE;
             perror("Error: you shouldn't force a gender on someone.");
-            exit(-5);
+            exit(-1);
         }
     }
+}
+
+void printPerson(Person *p)
+{
+    printf("%s\n", p->name);
+    if (p->sex == 'M')
+    {
+        printf("  Sex: Male\n");
+    }
+    else if (p->sex == 'F')
+    {
+        printf("  Sex: Female\n");
+    }
+    else
+    {
+        printf("  Sex: Unknown\n");
+    }
+    if (strcmp(p->father, "") == 0)
+    {
+        printf("  Father: Unknown\n");
+    }
+    else
+    {
+        printf("  Father: %s\n", p->father);
+    }
+    if (strcmp(p->mother, "") == 0)
+    {
+        printf("  Mother: Unknown\n");
+    }
+    else
+    {
+        printf("  Mother: %s\n", p->mother);
+    }
+    Dllist iter = dll_first(p->children);
+    Dllist nil = dll_nil(p->children);
+    if (iter == nil)
+    {
+        printf("  Children: None\n");
+    }
+    else
+    {
+        printf("  Children:\n");
+        while (iter != nil)
+        {
+            printf("    %s\n", ((Person*)iter->val.v)->name);
+            iter = dll_next(iter);
+        }
+    }
+    printf("\n");
 }
 
 void destroyPerson(Person *p)
@@ -272,4 +332,44 @@ void destroyPerson(Person *p)
     free_dllist(p->children);
     //free(p->children);
     free(p);
+}
+
+int isDescendant(Person *p)
+{
+    if (p->visited == 1) return 0;
+    if (p->visited == 2) return 1;
+    p->visited = 2;
+    Dllist tmp;
+    dll_traverse(tmp, p->children)
+    {
+        if (isDescendant((Person*) tmp->val.v)) return 1;
+    }
+    p->visited = 1;
+    return 0;
+}
+
+void cycleCheck(JRB people)
+{
+    JRB nil = jrb_nil(people);
+    JRB tmp;
+    jrb_traverse(tmp, people)
+    {
+        if (tmp == nil)
+        {
+            continue;
+        }
+        if (tmp == NULL)
+        {
+            errno = EJRBTRAVERSE;
+            perror("Internal Error: jrb_traverse produced a NULL pointer");
+            exit(-1);
+        }
+        Person *person = (Person*) tmp->val.v;
+        if (isDescendant(person))
+        {
+            errno = EDESCENDANTCYCLE;
+            perror("Error: a person cannot be their own descendant!");
+            exit(-1);
+        }
+    }
 }

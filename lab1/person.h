@@ -4,6 +4,17 @@
 // Added to maintain the definition of POSIX functions in C99
 #define _POSIX_C_SOURCE 200809L
 
+#include <errno.h>
+
+#define EBADCHILD 150 /* Child doesn't belong to parent. */
+#define EBADFATHER 151 /* Person is not the child's father. */
+#define EMULTIPARENT 152 /* Person cannot be a mother and father at same time. */
+#define EBADMOTHER 153 /* Person is not the child's mother. */
+#define EGENDERFORCE 154 /* Person's sex is already defined, so it can't be changed */
+#define EJRBTRAVERSE 155 /* JRB traverse produced a NULL pointer. */
+#define EDLLTRAVERSE 156 /* Dllist traverse produced a NULL pointer. */
+#define EDESCENDANTCYCLE 157 /* There's a cycle in the tree. */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,6 +47,8 @@ typedef struct person_t
     char  *mother;
     Dllist children;
     int    numChildren;
+    int    visited;
+    int    printed;
 } Person;
 
 extern Person* new_person();
@@ -56,6 +69,12 @@ extern void setMother(JRB people, Person *child, char **fields, int NF);
 
 extern void setSex(Person *p, char sex);
 
+extern void printPerson(Person *p);
+
 extern void destroyPerson(Person *p);
+
+extern int isDescendant(Person *p);
+
+extern void cycleCheck(JRB people);
 
 #endif

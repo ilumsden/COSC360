@@ -1,5 +1,62 @@
 #include "person.h"
 
+void printFamtree(JRB people)
+{
+    Dllist queue = new_dllist();
+    JRB tmp;
+    JRB nil = jrb_nil(people);
+    jrb_traverse(tmp, people)
+    {
+        if (tmp == nil)
+        {
+            continue;
+        }
+        if (tmp == NULL)
+        {
+            errno = EJRBTRAVERSE;
+            perror("Internal Error: jrb_traverse produced a NULL pointer");
+            exit(-1);
+        }
+        if (strcmp(((Person*)tmp->val.v)->father, "") == 0 && 
+            strcmp(((Person*)tmp->val.v)->mother, "") == 0)
+        {
+            dll_append(queue, tmp->val);
+        }
+    }
+    while (!dll_empty(queue))
+    {
+        Person *p = (Person*) dll_first(queue)->val.v;
+        dll_delete_node(dll_first(queue));
+        if (!p->printed)
+        {
+            if ((strcmp(p->father, "") == 0 && strcmp(p->mother, "") == 0) ||
+                (strcmp(p->father, "") == 0 && getMother(people, p)->printed) ||
+                (getFather(people, p)->printed && strcmp(p->mother, "") == 0) ||
+                (getFather(people, p)->printed && getMother(people, p)->printed))
+            {
+                printPerson(p);
+                p->printed = 1;
+                Dllist dtmp;
+                Dllist dnil = dll_nil(p->children);
+                dll_traverse(dtmp, p->children)
+                {
+                    if (dtmp == dnil)
+                    {
+                        continue;
+                    }
+                    if (dtmp == NULL)
+                    {
+                        errno = EDLLTRAVERSE;
+                        perror("Internal Error: dll_traverse produced a NULL pointer.");
+                        exit(-1);
+                    }
+                    dll_append(queue, dtmp->val);
+                }
+            }
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     // Red-Black Tree
@@ -19,19 +76,12 @@ int main(int argc, char **argv)
         }
         else if (strcmp(is->fields[0], "PERSON") == 0)
         {
-            if (p != NULL)
-            {
-                JRB node = jrb_find_str(people, p->name);
-                if (node == NULL)
-                {
-                    (void*) jrb_insert_str(people, p->name, new_jval_v((void*)p));
-                }
-            }
             char *name = getName(is->fields, is->NF);
             JRB node = jrb_find_str(people, name);
             if (node == NULL)
             {
                 p = new_person_name(name);
+                (void*) jrb_insert_str(people, p->name, new_jval_v((void*)p));
             }
             else
             {
@@ -43,10 +93,7 @@ int main(int argc, char **argv)
         else if (strcmp(is->fields[0], "SEX") == 0)
         {
             char sex = *(is->fields[1]);
-            if (p->sex != sex)
-            {
-                setSex(p, sex);
-            }
+            setSex(p, sex);
         }
         else if (strcmp(is->fields[0], "FATHER") == 0)
         {
@@ -82,7 +129,8 @@ int main(int argc, char **argv)
             return -1;
         }
     }
-    JRB per;
+    cycleCheck(people);
+    /*JRB per;
     JRB nil = jrb_nil(people);
     jrb_traverse(per, people)
     {
@@ -136,7 +184,9 @@ int main(int argc, char **argv)
             }
         }
         printf("\n");
-    }
+    }*/
+    printFamtree(people);
+    JRB per;
     jrb_rtraverse(per, people)
     {
         Person *elem = (Person*) per->val.v;
@@ -144,4 +194,5 @@ int main(int argc, char **argv)
     }
     jrb_free_tree(people);
     jettison_inputstruct(is);
+    return 0;
 }
