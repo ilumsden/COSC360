@@ -23,6 +23,7 @@
 #include "jval.h"
 #include "fields.h"
 
+/* This function simply ensures that malloc is successful. */
 inline void* _checkMalloc(void *ptr)
 {
     if (ptr == NULL)
@@ -33,12 +34,16 @@ inline void* _checkMalloc(void *ptr)
     return ptr;
 }
 
+// This macro wraps _checkMalloc
 #define memChk(p) _checkMalloc(p)
 
+// The max length of a name
 #define MAX_NAME_LENGTH 1024
 
+// Gets the name from the fields and NF data from IS
 extern char* getName(char **fields, int NF);
 
+// This struct stores all the needed data for a person
 typedef struct person_t
 {
     char  *name;
@@ -51,24 +56,34 @@ typedef struct person_t
     int    printed;
 } Person;
 
+// Creates a new, unnamed person
 extern Person* new_person();
 
+// Creates a new person with the provided name
 extern Person* new_person_name(const char *pname);
 
+// Gets the child with name cname if its the parent's child
 extern Person* getChild(JRB people, Person *parent, char *cname);
 
+// Adds the child with name cname to the parent's children list
 extern void addChild(JRB people, Person *parent, char *cname);
 
+// Gets the father of the current person 
 extern Person* getFather(JRB people, Person *child, int iline);
 
+// Set the father of the current person
 extern void setFather(JRB people, Person *child, char **fields, int NF, int iline);
 
+// Gets the mother of the current person
 extern Person* getMother(JRB people, Person *child, int iline);
 
+// Sets the mother of the current person
 extern void setMother(JRB people, Person *child, char **fields, int NF, int iline);
 
+// Sets the sex of the current person
 extern void setSex(Person *p, char sex, int iline);
 
+// 
 extern void printPerson(Person *p);
 
 extern void destroyPerson(Person *p);

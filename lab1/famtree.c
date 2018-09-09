@@ -55,6 +55,7 @@ void printFamtree(JRB people)
             }
         }
     }
+    free_dllist(queue);
 }
 
 int main(int argc, char **argv)
