@@ -97,11 +97,11 @@ int main(int argc, char **argv)
         }
         else if (strcmp(is->fields[0], "FATHER") == 0)
         {
-            setFather(people, p, is->fields, is->NF, is->iline);
+            setFather(people, p, is->fields, is->NF, is->line);
         }
         else if (strcmp(is->fields[0], "MOTHER") == 0)
         {
-            setMother(people, p, is->fields, is->NF, is->iline);
+            setMother(people, p, is->fields, is->NF, is->line);
         }
         else if (strcmp(is->fields[0], "FATHER_OF") == 0)
         {
@@ -125,7 +125,7 @@ int main(int argc, char **argv)
         }
         else
         {
-            perror("3: Unknown key: %s", is->fields[0]);
+            fprintf(stderr, "3: Unknown key: %s", is->fields[0]);
             return -1;
         }
     }
