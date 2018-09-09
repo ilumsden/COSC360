@@ -193,7 +193,7 @@ void setFather(JRB people, Person *child, char **fields, int NF, int iline)
     if (strcmp(child->father, "") != 0 && strcmp(child->father, pname) != 0)
     {
         errno = EBADFATHER;
-        fprintf(stderr, "Bad Input -- child with two fathers on line %d\n", iline);
+        fprintf(stderr, "Bad input -- child with two fathers on line %d\n", iline);
         exit(-1);
     }
     strcpy(child->father, pname);
