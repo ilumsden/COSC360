@@ -1,10 +1,18 @@
+/* famtree.c
+ * Author: Ian Lumsden
+ *
+ * Reads in a file, produces the corresponding tree, and prints the tree.
+ */
+
 #include "person.h"
 
+// Prints the tree
 void printFamtree(JRB people)
 {
     Dllist queue = new_dllist();
     JRB tmp;
     JRB nil = jrb_nil(people);
+    // Adds all people in the tree who don't have a parent to the queue.
     jrb_traverse(tmp, people)
     {
         if (tmp == nil)
@@ -25,16 +33,22 @@ void printFamtree(JRB people)
     }
     while (!dll_empty(queue))
     {
+        // Pop a person off the front
         Person *p = (Person*) dll_first(queue)->val.v;
         dll_delete_node(dll_first(queue));
+        // If the person has already been printed, do nothing.
         if (!p->printed)
         {
+            // If the person doesn't have a parent or all the person's parent's have been
+            // printed, move on to the next step.
             if ((strcmp(p->father, "") == 0 && strcmp(p->mother, "") == 0) ||
                 (strcmp(p->father, "") == 0 && getMother(people, p, 0)->printed) ||
                 (getFather(people, p, 0)->printed && strcmp(p->mother, "") == 0) ||
                 (getFather(people, p, 0)->printed && getMother(people, p, 0)->printed))
             {
+                // Print person
                 printPerson(p);
+                // Add the person's children to the list
                 p->printed = 1;
                 Dllist dtmp;
                 Dllist dnil = dll_nil(p->children);
@@ -55,6 +69,7 @@ void printFamtree(JRB people)
             }
         }
     }
+    // Free the list's memory.
     free_dllist(queue);
 }
 
@@ -69,12 +84,15 @@ int main(int argc, char **argv)
     is = new_inputstruct(NULL);
     // Constructs the Red-Black tree
     people = make_jrb();
+    // For each line in the file
     while (get_line(is) >= 0)
     {
+        // If a blank line, do nothing
         if (is->NF == 0)
         {
             continue;
         }
+        // If its a person line, extract/create the person
         else if (strcmp(is->fields[0], "PERSON") == 0)
         {
             char *name = getName(is->fields, is->NF);
@@ -90,19 +108,23 @@ int main(int argc, char **argv)
             }
             free(name);
         }
+        // If its a sex line, set the person's sex
         else if (strcmp(is->fields[0], "SEX") == 0)
         {
             char sex = *(is->fields[1]);
             setSex(p, sex, is->line);
         }
+        // If its a father line, set the person's father
         else if (strcmp(is->fields[0], "FATHER") == 0)
         {
             setFather(people, p, is->fields, is->NF, is->line);
         }
+        // If its a mother line, set the person's mother
         else if (strcmp(is->fields[0], "MOTHER") == 0)
         {
             setMother(people, p, is->fields, is->NF, is->line);
         }
+        // If its a father_of line, set the child
         else if (strcmp(is->fields[0], "FATHER_OF") == 0)
         {
             if (p->sex != 'M')
@@ -113,6 +135,7 @@ int main(int argc, char **argv)
             addChild(people, p, cname);
             free(cname);
         }
+        // If its a mother_of line, set the child
         else if (strcmp(is->fields[0], "MOTHER_OF") == 0)
         {
             if (p->sex != 'F')
@@ -123,14 +146,18 @@ int main(int argc, char **argv)
             addChild(people, p, cname);
             free(cname);
         }
+        // If the keyword is unrecognized, raise an error.
         else
         {
             fprintf(stderr, "3: Unknown key: %s\n", is->fields[0]);
             return -1;
         }
     }
+    // Check for cycles
     cycleCheck(people);
+    // Print the tree
     printFamtree(people);
+    // Free data
     JRB per;
     jrb_rtraverse(per, people)
     {

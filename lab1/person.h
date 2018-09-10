@@ -1,6 +1,12 @@
 #ifndef PERSON_H
 #define PERSON_H
 
+/* person.h
+ * Author: Ian Lumsden
+ *
+ * Header file for anything person related.
+ */
+
 // Added to maintain the definition of POSIX functions in C99
 #define _POSIX_C_SOURCE 200809L
 
@@ -83,13 +89,16 @@ extern void setMother(JRB people, Person *child, char **fields, int NF, int ilin
 // Sets the sex of the current person
 extern void setSex(Person *p, char sex, int iline);
 
-// 
+// Prints the information for the person
 extern void printPerson(Person *p);
 
+// Frees the memory for the person
 extern void destroyPerson(Person *p);
 
+// Checks if a person is their own descendant
 extern int isDescendant(Person *p);
 
+// Checks for cycles in the tree
 extern void cycleCheck(JRB people);
 
 #endif
