@@ -111,6 +111,7 @@ void print_data(IP *ip, FILE *stream)
     Dllist tmp;
     dll_traverse(tmp, ip->names)
     {
+        printf("tmp is %p\n", (void*) tmp);
         char *name = (char*) tmp->val.s;
         if (name == NULL || strcmp(name, "") == 0)
         {
