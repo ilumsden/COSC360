@@ -50,14 +50,16 @@ void read_bin_data(IP *ip, FILE *stream)
             name[idx] = c;
             if (c == '.' && !absolute)
             {
+                printf("Detected .\n");
                 absolute = true;
             }
             if (c == '\0')
             {
+                printf("Detected NULL\n");
                 break;
             }
+            printf("name is %s\n", name);
         }
-        printf("name is %s\n", name);
         dll_append(ip->names, new_jval_s(name));
         if (absolute)
         {
