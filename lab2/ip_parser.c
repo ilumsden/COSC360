@@ -58,6 +58,7 @@ void read_bin_data(IP *ip, FILE *stream)
                 printf("Detected NULL\n");
                 break;
             }
+            idx++;
             printf("name is %s\n", name);
         }
         dll_append(ip->names, new_jval_s(name));
