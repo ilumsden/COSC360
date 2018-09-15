@@ -114,9 +114,7 @@ void read_bin_data(IP *ip, FILE *stream)
 
 void print_data(IP *ip, FILE *stream)
 {
-    char *addr = get_address(ip);
-    printf("%s: ", addr);
-    free(addr);
+    printf("%s: ", ip->address);
     /*for (int i = 0; i < 4; i++)
     {
         fprintf(stream, "%d", (int)ip->address[i]);
