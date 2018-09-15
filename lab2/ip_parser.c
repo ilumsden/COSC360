@@ -62,7 +62,12 @@ void read_bin_data(IP *ip, FILE *stream)
         dll_append(ip->names, new_jval_s(name));
         if (absolute)
         {
-            char *end_ptr = strchr(name, '.');
+            char *end_ptr = strchr(name, (int)'.');
+            if (end_ptr == NULL)
+            {
+                fprintf(stderr, "Internal Error: Name (%s) is supposedly absolute, but could not find dot", name);
+                goto epoint;
+            }
             int len = end_ptr - name;
             char *local = (char*) memChk(malloc(len));
             for (int i = 0; i < len; i++)
@@ -71,6 +76,8 @@ void read_bin_data(IP *ip, FILE *stream)
             }
             dll_append(ip->names, new_jval_s(local));
         }
+    epoint:
+        return;
     }
 }
 
