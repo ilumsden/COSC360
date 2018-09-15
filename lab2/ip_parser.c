@@ -16,7 +16,7 @@ IP* new_ip()
     {
         ip->address_nums[i] = '\0';
     }
-    ip->address = (char*) memChk(malloc(15*sizeof(char)));
+    ip->address = (char*) memChk(malloc(16*sizeof(char)));
     ip->address[0] = 0;
     return ip;
 }
