@@ -23,6 +23,7 @@ int main(int argc, char **argv)
     {
         IP *cur = (IP*) tmp->val.v;
         print_data(cur, stdout);
+        printf("\n");
     }
     jrb_traverse(tmp, ip_tree)
     {

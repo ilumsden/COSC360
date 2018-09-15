@@ -93,7 +93,10 @@ char* get_address(IP *ip)
 
 void print_data(IP *ip, FILE *stream)
 {
-    for (int i = 0; i < 4; i++)
+    char *addr = get_address(ip);
+    printf("%s: ", addr);
+    free(addr);
+    /*for (int i = 0; i < 4; i++)
     {
         fprintf(stream, "%d", (int)ip->address[i]);
         if (i != 3)
@@ -104,7 +107,7 @@ void print_data(IP *ip, FILE *stream)
         {
             fprintf(stream, ": ");
         }
-    }
+    }*/
     Dllist tmp;
     dll_traverse(tmp, ip->names)
     {
