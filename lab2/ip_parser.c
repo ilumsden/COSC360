@@ -22,13 +22,11 @@ void read_bin_data(IP *ip, FILE *stream)
 {
     fread(ip->address, sizeof(unsigned char), 4, stream);
     unsigned int numNames = 0;
-    unsigned int ich = 0;
     unsigned char ch = 0;
     for (int i = 0; i < 4; i++)
     {
         fread(&ch, sizeof(unsigned char), 1, stream);
-        ich = (unsigned int) ch;
-        numNames = intcat(numNames, ch);
+        numNames = intcat(numNames, (unsigned int) ch);
     }
     /*char num[13];
     num[0] = 0;
