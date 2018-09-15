@@ -1,7 +1,5 @@
 #include "ip_parser.h"
 
-#include <stdbool.h>
-
 IP* new_ip()
 {
     IP* ip = (IP*) memChk(malloc(sizeof(IP)));
@@ -59,10 +57,11 @@ void read_bin_data(IP *ip, FILE *stream)
                 break;
             }
         }
+        printf("name is %s\n", name);
         dll_append(ip->names, new_jval_s(name));
         if (absolute)
         {
-            char *end_ptr = strchr(name, (int)'.');
+            char *end_ptr = strchr(name, '.');
             if (end_ptr == NULL)
             {
                 fprintf(stderr, "Internal Error: Name (%s) is supposedly absolute, but could not find dot", name);
@@ -77,7 +76,7 @@ void read_bin_data(IP *ip, FILE *stream)
             dll_append(ip->names, new_jval_s(local));
         }
     epoint:
-        return;
+        exit(1);
     }
 }
 
