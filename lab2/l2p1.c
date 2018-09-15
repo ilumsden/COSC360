@@ -24,4 +24,12 @@ int main(int argc, char **argv)
         IP *cur = (IP*) tmp->val.v;
         print_data(cur, stdout);
     }
+    jrb_traverse(tmp, ip_tree)
+    {
+        char *addr = tmp->key.s;
+        free(addr);
+        ip = (IP*) tmp->val.v;
+        free_ip(ip);
+    }
+    jrb_free_tree(ip_tree);
 }

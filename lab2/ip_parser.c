@@ -80,7 +80,7 @@ char* get_address(IP *ip)
      int a1 = (int) ip->address[1];
      int a2 = (int) ip->address[2];
      int a3 = (int) ip->address[3];
-     char addr[15];
+     char *addr = (char*) malloc(15);
      sprintf(addr, "%d.%d.%d.%d", a0, a1, a2, a3);
      return addr;
 }
