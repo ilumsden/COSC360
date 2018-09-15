@@ -13,7 +13,7 @@ IP* new_ip()
 
 void read_bin_data(IP *ip, FILE *stream)
 {
-    fread(ip->names, 1, 4, stream);
+    fread(ip->address, sizeof(unsigned char), 4, stream);
     int numNames = 0;
     char num[12];
     num[0] = 0;
