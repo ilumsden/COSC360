@@ -21,7 +21,7 @@ void read_bin_data(IP *ip, FILE *stream)
     num[0] = 0;
     unsigned char comp;
     char str_comp[3];
-    ch[0] = 0;
+    str_comp[0] = 0;
     int int_comp;
     for (int i = 0; i < 4; i++)
     {
