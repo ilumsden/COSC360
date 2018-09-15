@@ -44,7 +44,7 @@ void read_bin_data(IP *ip, FILE *stream)
     }
     char *endptr;
     numNames = (int) strtoimax(num, &endptr, 10);*/
-    printf("numNames is %d\n", numNames);
+    //printf("numNames is %d\n", numNames);
     char *name;
     int idx;
     bool absolute;
@@ -102,6 +102,7 @@ char* get_address(IP *ip)
      int a2 = (int) ip->address[2];
      int a3 = (int) ip->address[3];
      char *addr = (char*) memChk(malloc(15));
+     addr[0] = 0;
      sprintf(addr, "%d.%d.%d.%d", a0, a1, a2, a3);
      return addr;
 }
