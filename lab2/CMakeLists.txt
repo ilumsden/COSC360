@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
-project(CS360Lab1)
+project(CS360Lab2)
 enable_language(C)
 
 option(PERSONAL "Builds lab 1 for a non-Hydra computer." OFF)
@@ -16,7 +16,6 @@ endif()
 set (CMAKE_C_FLAGS "-Wall -g -O ${CMAKE_C_FLAGS}")
 
 if(PERSONAL)
-    message(STATUS "Building fdr")
     file(GLOB fdr_src "${PROJECT_SOURCE_DIR}/../libfdr/src/*.c")
     file(GLOB fdr_headers "${PROJECT_SOURCE_DIR}/../libfdr/include/*.h")
     if(NOT TARGET fdr)
@@ -24,8 +23,8 @@ if(PERSONAL)
     endif()
 endif()
 
-file(GLOB lab1_src "${PROJECT_SOURCE_DIR}/*.c")
-file(GLOB lab1_headers "${PROJECT_SOURCE_DIR}/*.h")
+file(GLOB lab2_src "${PROJECT_SOURCE_DIR}/*.c")
+file(GLOB lab2_headers "${PROJECT_SOURCE_DIR}/*.h")
 
 if(PERSONAL)
     include_directories(${PROJECT_SOURCE_DIR}/../libfdr/include)
@@ -33,10 +32,10 @@ else()
     include_directories(/home/plank/cs360/include)
 endif()
 
-add_executable(famtree ${lab1_src} ${lab1_headers})
+add_executable(l2p1 ${lab2_src} ${lab2_headers})
 
 if(PERSONAL)
-    target_link_libraries(famtree PRIVATE fdr)
+    target_link_libraries(l2p1 PRIVATE fdr)
 else()
-    target_link_libraries(famtree PRIVATE /home/plank/cs360/objs/libfdr.a)
+    target_link_libraries(l2p1 PRIVATE /home/plank/cs360/objs/libfdr.a)
 endif()
