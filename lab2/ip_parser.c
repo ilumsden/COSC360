@@ -4,7 +4,7 @@
 
 IP* new_ip()
 {
-    IP* ip = (IP*) malloc(sizeof(IP));
+    IP* ip = (IP*) memChk(malloc(sizeof(IP)));
     ip->names = new_dllist();
     for (int i = 0; i < 4; i++)
     {
@@ -37,7 +37,7 @@ void read_bin_data(IP *ip, FILE *stream)
     bool absolute;
     for (int i = 0; i < numNames; i++)
     {
-        name = (char*) malloc(MAX_NAME_LENGTH);
+        name = (char*) memChk(malloc(MAX_NAME_LENGTH));
         idx = 0;
         absolute = false;
         while (1)
@@ -64,7 +64,7 @@ void read_bin_data(IP *ip, FILE *stream)
         {
             char *end_ptr = strchr(name, '.');
             int len = end_ptr - name;
-            char *local = (char*) malloc(len);
+            char *local = (char*) memChk(malloc(len));
             for (int i = 0; i < len; i++)
             {
                 local[i] = name[i];
@@ -80,7 +80,7 @@ char* get_address(IP *ip)
      int a1 = (int) ip->address[1];
      int a2 = (int) ip->address[2];
      int a3 = (int) ip->address[3];
-     char *addr = (char*) malloc(15);
+     char *addr = (char*) memChk(malloc(15));
      sprintf(addr, "%d.%d.%d.%d", a0, a1, a2, a3);
      return addr;
 }
