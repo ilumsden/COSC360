@@ -23,6 +23,8 @@ inline void* _checkMalloc(void *ptr)
 
 #define MAX_NAME_LENGTH 1024
 
+extern unsigned int intcat(unsigned int a, unsigned int b);
+
 typedef struct ip_data
 {
     unsigned char address[4];

@@ -1,5 +1,12 @@
 #include "ip_parser.h"
 
+unsigned int intcat(unsigned int a, unsigned int b)
+{
+    unsigned int p = 10;
+    while (b >= p) p *= 10;
+    return a * p + b;
+}
+
 IP* new_ip()
 {
     IP* ip = (IP*) memChk(malloc(sizeof(IP)));
@@ -14,8 +21,16 @@ IP* new_ip()
 void read_bin_data(IP *ip, FILE *stream)
 {
     fread(ip->address, sizeof(unsigned char), 4, stream);
-    int numNames = 0;
-    char num[13];
+    unsigned int numNames = 0;
+    unsigned int ich = 0;
+    unsigned char ch = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        fread(&ch, sizeof(unsigned char), 1, stream);
+        ich = (unsigned int) ch;
+        numNames = intcat(numNames, ch);
+    }
+    /*char num[13];
     num[0] = 0;
     unsigned char comp;
     char str_comp[4];
@@ -30,7 +45,7 @@ void read_bin_data(IP *ip, FILE *stream)
         //strcat(num, str_comp);
     }
     char *endptr;
-    numNames = (int) strtoimax(num, &endptr, 10);
+    numNames = (int) strtoimax(num, &endptr, 10);*/
     printf("numNames is %d\n", numNames);
     char *name;
     int idx;
