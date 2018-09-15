@@ -128,8 +128,13 @@ void print_data(IP *ip, FILE *stream)
         }
     }*/
     Dllist tmp;
+    Dllist nil = dll_nil(ip->names);
     dll_traverse(tmp, ip->names)
     {
+        if (tmp == nil)
+        {
+            continue;
+        }
         char *name = (char*) tmp->val.s;
         if (name == NULL || strcmp(name, "") == 0)
         {
