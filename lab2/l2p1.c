@@ -18,6 +18,7 @@ int main(int argc, char **argv)
         char *address = get_address(ip);
         jrb_insert_str(ip_tree, address, new_jval_v((void*)ip));
     }
+    fclose(stream);
     JRB tmp;
     jrb_traverse(tmp, ip_tree)
     {

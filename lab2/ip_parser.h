@@ -25,17 +25,19 @@ inline void* _checkMalloc(void *ptr)
 
 extern unsigned int intcat(unsigned int a, unsigned int b);
 
+
 typedef struct ip_data
 {
-    unsigned char address[4];
+    unsigned char* address_nums;
+    char *address;
     Dllist names;
 } IP;
 
 extern IP* new_ip();
 
-extern void read_bin_data(IP* ip, FILE *stream);
+extern void gen_address(IP *ip);
 
-extern char* get_address(IP *ip);
+extern void read_bin_data(IP* ip, FILE *stream);
 
 extern void print_data(IP *ip, FILE *stream);
 

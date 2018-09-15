@@ -11,16 +11,33 @@ IP* new_ip()
 {
     IP* ip = (IP*) memChk(malloc(sizeof(IP)));
     ip->names = new_dllist();
+    ip->address_nums = (unsigned char*) memChk(malloc(4*sizeof(unsigned char)));
     for (int i = 0; i < 4; i++)
     {
-        ip->address[i] = '\0';
+        ip->address_nums[i] = '\0';
     }
+    ip->address = (char*) memChk(malloc(15*sizeof(char)));
+    ip->address[0] = 0;
     return ip;
+}
+
+void gen_address(IP *ip)
+{
+     int a0 = (int) ip->address_nums[0];
+     int a1 = (int) ip->address_nums[1];
+     int a2 = (int) ip->address_nums[2];
+     int a3 = (int) ip->address_nums[3];
+     //char *addr = (char*) memChk(malloc(15));
+     //addr[0] = 0;
+     sprintf(ip->address, "%d.%d.%d.%d", a0, a1, a2, a3);
+     printf("addr is %s\n", ip->address);
+     //return addr;
 }
 
 void read_bin_data(IP *ip, FILE *stream)
 {
-    fread(ip->address, sizeof(unsigned char), 4, stream);
+    fread(ip->address_nums, sizeof(unsigned char), 4, stream);
+    gen_address(ip);
     unsigned int numNames = 0;
     unsigned char ch = 0;
     for (int i = 0; i < 4; i++)
@@ -95,19 +112,6 @@ void read_bin_data(IP *ip, FILE *stream)
     }
 }
 
-char* get_address(IP *ip)
-{
-     int a0 = (int) ip->address[0];
-     int a1 = (int) ip->address[1];
-     int a2 = (int) ip->address[2];
-     int a3 = (int) ip->address[3];
-     char *addr = (char*) memChk(malloc(15));
-     addr[0] = 0;
-     sprintf(addr, "%d.%d.%d.%d", a0, a1, a2, a3);
-     printf("addr is %s\n", addr);
-     return addr;
-}
-
 void print_data(IP *ip, FILE *stream)
 {
     char *addr = get_address(ip);
@@ -141,5 +145,7 @@ void print_data(IP *ip, FILE *stream)
 void free_ip(IP *ip)
 {
     free_dllist(ip->names);
+    free(ip->address);
+    free(ip->address_nums);
     free(ip);
 }
