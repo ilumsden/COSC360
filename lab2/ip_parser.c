@@ -114,7 +114,7 @@ void read_bin_data(IP *ip, FILE *stream)
 
 void print_data(IP *ip, FILE *stream)
 {
-    printf("%s: ", ip->address);
+    fprintf(stream, "%s: ", ip->address);
     /*for (int i = 0; i < 4; i++)
     {
         fprintf(stream, "%d", (int)ip->address[i]);
@@ -136,7 +136,7 @@ void print_data(IP *ip, FILE *stream)
             continue;
         }
         char *name = (char*) tmp->val.s;
-        printf("name is %s\n", name);
+        fprintf(stream, "name is %s\n", name);
         if (name == NULL || strcmp(name, "") == 0)
         {
             perror("Error: invalid name for this IP.");
