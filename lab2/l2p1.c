@@ -15,8 +15,16 @@ int main(int argc, char **argv)
     {
         ip = new_ip();
         read_bin_data(ip, stream);
-        //printf("address is %s\n", ip->address);
-        jrb_insert_str(ip_tree, ip->address, new_jval_v((void*)ip));
+        Dllist dtmp;
+        Dllist dnil = dll_nil(ip->names);
+        dll_traverse(dtmp, ip->names)
+        {
+            if (dtmp == dnil)
+            {
+                continue;
+            }
+            jrb_insert_str(ip_tree, dtmp->val.v, new_jval_v((void*)ip));
+        }
     }
     fclose(stream);
     JRB tmp;
