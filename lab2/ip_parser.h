@@ -1,6 +1,7 @@
 #ifndef IP_PARSER_H
 #define IP_PARSER_H
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
