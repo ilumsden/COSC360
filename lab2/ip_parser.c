@@ -16,8 +16,22 @@ IP* new_ip()
 void read_bin_data(IP *ip, FILE *stream)
 {
     fread(ip->names, 1, 4, stream);
-    int numNames;
-    fread(&numNames, sizeof(int), 1, stream);
+    int numNames = 0;
+    char num[12];
+    num[0] = 0;
+    unsigned char comp;
+    char str_comp[3];
+    ch[0] = 0;
+    int int_comp;
+    for (int i = 0; i < 4; i++)
+    {
+        fread(&comp, sizeof(unsigned char), 1, stream);
+        int_comp = (int) comp;
+        sprintf(str_comp, "%d", int_comp);
+        strcat(num, str_comp);
+    }
+    char *endptr;
+    numNames = (int) strtoimax(num, &endptr, 10);
     char *name;
     int idx;
     bool absolute;
