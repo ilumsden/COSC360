@@ -1,30 +1,6 @@
 #include "ip_parser.h"
 #include "jrb.h"
 
-int name_list_cmp(Jval list1, Jval list2)
-{
-    Dllist l1 = (Dllist) list1.v;
-    Dllist l2 = (Dllist) list2.v;
-    if (l1 == l2)
-    {
-        return 0;
-    }
-    else if (l1 == NULL && l2 != NULL)
-    {
-        return -1;
-    }
-    else if (l1 != NULL && l2 == NULL)
-    {
-        return 1;
-    }
-    else
-    {
-        char *n1 = (char*) dll_first(l1)->val.s;
-        char *n2 = (char*) dll_first(l2)->val.s;
-        return strcmp(n1, n2);
-    }
-}
-
 int main(int argc, char **argv)
 {
     FILE *stream = fopen("converted", "r");
@@ -39,7 +15,8 @@ int main(int argc, char **argv)
     {
         ip = new_ip();
         read_bin_data(ip, stream);
-        jrb_insert_gen(ip_tree, new_jval_v((void*)ip->names), new_jval_v((void*)ip), name_list_cmp);
+        char *address = get_address(ip);
+        jrb_insert_str(ip_tree, address, new_jval_v((void*)ip));
     }
     JRB tmp;
     jrb_traverse(tmp, ip_tree)

@@ -19,6 +19,8 @@ extern IP* new_ip();
 
 extern void read_bin_data(IP* ip, FILE *stream);
 
+extern char* get_address(IP *ip);
+
 extern void print_data(IP *ip, FILE *stream);
 
 extern void free_ip(IP *ip);
