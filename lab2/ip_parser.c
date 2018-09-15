@@ -26,7 +26,8 @@ void read_bin_data(IP *ip, FILE *stream)
         fread(&comp, sizeof(unsigned char), 1, stream);
         int_comp = (int) comp;
         sprintf(str_comp, "%d", int_comp);
-        strcat(num, str_comp);
+        strcpy(num+strlen(num), str_comp);
+        //strcat(num, str_comp);
     }
     char *endptr;
     numNames = (int) strtoimax(num, &endptr, 10);
