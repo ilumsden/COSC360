@@ -15,10 +15,10 @@ void read_bin_data(IP *ip, FILE *stream)
 {
     fread(ip->address, sizeof(unsigned char), 4, stream);
     int numNames = 0;
-    char num[12];
+    char num[13];
     num[0] = 0;
     unsigned char comp;
-    char str_comp[3];
+    char str_comp[4];
     str_comp[0] = 0;
     int int_comp;
     for (int i = 0; i < 4; i++)
