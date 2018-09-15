@@ -30,6 +30,7 @@ void read_bin_data(IP *ip, FILE *stream)
     }
     char *endptr;
     numNames = (int) strtoimax(num, &endptr, 10);
+    printf("numNames is %d\n", numNames);
     char *name;
     int idx;
     bool absolute;
