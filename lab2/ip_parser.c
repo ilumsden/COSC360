@@ -136,6 +136,7 @@ void print_data(IP *ip, FILE *stream)
             continue;
         }
         char *name = (char*) tmp->val.s;
+        printf("name is %s\n", name);
         if (name == NULL || strcmp(name, "") == 0)
         {
             perror("Error: invalid name for this IP.");
@@ -147,6 +148,16 @@ void print_data(IP *ip, FILE *stream)
 
 void free_ip(IP *ip)
 {
+    Dllist tmp;
+    Dllist nil = dll_nil(ip->names);
+    dll_traverse(tmp, ip->names)
+    {
+        if (tmp == nil)
+        {
+            continue;
+        }
+        free(tmp->val.s);
+    }
     free_dllist(ip->names);
     free(ip->address);
     free(ip->address_nums);
