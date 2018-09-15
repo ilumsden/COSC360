@@ -30,7 +30,7 @@ void gen_address(IP *ip)
      //char *addr = (char*) memChk(malloc(15));
      //addr[0] = 0;
      sprintf(ip->address, "%d.%d.%d.%d", a0, a1, a2, a3);
-     printf("addr is %s\n", ip->address);
+     //printf("addr is %s\n", ip->address);
      //return addr;
 }
 

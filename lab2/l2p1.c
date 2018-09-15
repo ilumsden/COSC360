@@ -15,6 +15,7 @@ int main(int argc, char **argv)
     {
         ip = new_ip();
         read_bin_data(ip, stream);
+        printf("address is %s\n", ip->address);
         jrb_insert_str(ip_tree, ip->address, new_jval_v((void*)ip));
     }
     fclose(stream);
