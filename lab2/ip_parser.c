@@ -123,6 +123,7 @@ int read_bin_data_sys(IP *ip, int stream)
         name[0] = 0;
         idx = 0;
         locallen = 0;
+        char c = 0;
         absolute = false;
         while (1)
         {
@@ -164,7 +165,8 @@ int read_bin_data_sys(IP *ip, int stream)
         }
     }
     epoint:
-        return;
+        return 0;
+    return 0;
 }
 
 void print_data(IP *ip, FILE *stream)
