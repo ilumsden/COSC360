@@ -23,7 +23,7 @@ int main(int argc, char **argv)
             {
                 continue;
             }
-            jrb_insert_str(ip_tree, dtmp->val.v, new_jval_v((void*)ip));
+            jrb_insert_str(ip_tree, dtmp->val.s, new_jval_v((void*)ip));
         }
     }
     fclose(stream);
@@ -46,8 +46,11 @@ int main(int argc, char **argv)
     }
     jrb_traverse(tmp, ip_tree)
     {
-        ip = (IP*) tmp->val.v;
-        free_ip(ip);
+        if (tmp->val != NULL)
+        {
+            ip = (IP*) tmp->val.v;
+            free_ip(ip);
+        }
     }
     jrb_free_tree(ip_tree);
 }
