@@ -26,7 +26,6 @@ inline void* _checkMalloc(void *ptr)
 
 extern unsigned int intcat(unsigned int a, unsigned int b);
 
-
 typedef struct ip_data
 {
     unsigned char address_nums[4];

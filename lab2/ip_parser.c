@@ -29,7 +29,7 @@ void gen_address(IP *ip)
      sprintf(ip->address, "%d.%d.%d.%d", a0, a1, a2, a3);
 }
 
-void read_bin_data(IP *ip, FILE *stream)
+void read_bin_data_fpointer(IP *ip, FILE *stream)
 {
     fread(ip->address_nums, sizeof(unsigned char), 4, stream);
     gen_address(ip);
