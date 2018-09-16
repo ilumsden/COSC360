@@ -68,7 +68,7 @@ void read_bin_data(IP *ip, FILE *stream)
     for (int i = 0; i < numNames; i++)
     {
         name = (char*) memChk(malloc(MAX_NAME_LENGTH));
-        idx = 0;
+        name[0] = 0;
         absolute = false;
         while (1)
         {
@@ -79,7 +79,7 @@ void read_bin_data(IP *ip, FILE *stream)
                 break;
             }
             char c = fgetc(stream);
-            name[idx] = c;
+            name[strlen(name)] = c;
             if (c == '.' && !absolute)
             {
                 absolute = true;
@@ -88,7 +88,6 @@ void read_bin_data(IP *ip, FILE *stream)
             {
                 break;
             }
-            idx++;
         }
         dll_append(ip->names, new_jval_s(name));
         if (absolute)
