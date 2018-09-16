@@ -96,6 +96,77 @@ void read_bin_data_fpointer(IP *ip, FILE *stream)
         return;
 }
 
+int read_bin_data_sys(IP *ip, int stream)
+{
+    if ( read(stream, ip->address_nums, 4*sizeof(unsigned char)) < 0 )
+    {
+        return 1;
+    }
+    gen_address(ip);
+    unsigned int numNames = 0;
+    unsigned char ch = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        if ( read(stream, &ch, sizeof(unsigned char)) < 0 )
+        {
+            return 1;
+        }
+        numNames = intcat(numNames, (unsigned int) ch);
+    }
+    char *name;
+    int idx;
+    int locallen;
+    bool absolute;
+    for (int i = 0; i < numNames; i++)
+    {
+        name = (char*) memChk(malloc(MAX_NAME_LENGTH));
+        name[0] = 0;
+        idx = 0;
+        locallen = 0;
+        absolute = false;
+        while (1)
+        {
+            if (idx == MAX_NAME_LENGTH - 2)
+            {
+                name[idx] = '\0';
+                printf("Could not read full name. Extracted name is %s\n", name);
+                break;
+            }
+            if ( read(stream, &c, sizeof(char)) < 0 )
+            {
+                return 1;
+            }
+            name[idx] = c;
+            if (c == '.' && !absolute)
+            {
+                locallen = idx+1;
+                absolute = true;
+            }
+            if (c == '\0')
+            {
+                break;
+            }
+            ++idx;
+        }
+        jrb_insert_str(ip->names, name, new_jval_v(NULL));
+        if (absolute)
+        {
+            if (locallen == 0)
+            {
+                fprintf(stderr, "Internal Error: Name (%s) is supposedly absolute, but could not find dot", name);
+                goto epoint;
+            }
+            char *local = (char*) memChk(malloc(locallen));
+            local[0] = 0;
+            strncpy(local, name, locallen-1);
+            local[locallen-1] = 0;
+            jrb_insert_str(ip->names, local, new_jval_v(NULL));
+        }
+    }
+    epoint:
+        return;
+}
+
 void print_data(IP *ip, FILE *stream)
 {
     fprintf(stream, "%s: ", ip->address);
