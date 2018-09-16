@@ -31,6 +31,7 @@ int main(int argc, char **argv)
                 perror("Error: name is empty before insert");
                 return -1;
             }
+            printf("local is %s\n", name);
             jrb_insert_str(ip_tree, name, new_jval_v((void*)ip));
         }
         dll_append(ip_list, new_jval_v((void*)ip));
