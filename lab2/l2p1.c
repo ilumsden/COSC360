@@ -25,7 +25,13 @@ int main(int argc, char **argv)
             {
                 continue;
             }
-            jrb_insert_str(ip_tree, dtmp->val.s, new_jval_v((void*)ip));
+            char *name = dtmp->val.s;
+            if (name == NULL || strcmp(name, "") == 0)
+            {
+                perror("Error: name is empty before insert");
+                return -1;
+            }
+            jrb_insert_str(ip_tree, name, new_jval_v((void*)ip));
         }
         dll_append(ip_list, new_jval_v((void*)ip));
     }
