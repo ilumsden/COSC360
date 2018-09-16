@@ -78,7 +78,12 @@ void read_bin_data(IP *ip, FILE *stream)
                 printf("Could not read full name. Extracted name is %s\n", name);
                 break;
             }
-            char c = fgetc(stream);
+            char c = (char) fgetc(stream);
+            if (feof(c))
+            {
+                perror("Error: the file ended in the middle of a name read");
+                exit(-1);
+            }
             name[strlen(name)] = c;
             if (c == '.' && !absolute)
             {
