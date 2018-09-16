@@ -117,7 +117,7 @@ void read_bin_data(IP *ip, FILE *stream)
             //int len = end_ptr - name;
             //printf("len is %d\n", len);
             //char *local = (char*) memChk(malloc(len));
-            char *local = (char*) memChk(malloc(locallen)+1);
+            char *local = (char*) memChk(malloc(locallen+1));
             local[0] = 0;
             //for (int i = 0; i < len; i++)
             for (int i = 0; i < locallen-1; i++)
