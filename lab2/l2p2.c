@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     while (!cont)
     {
         ip = new_ip();
-        cont = read_bin_data_fpointer(ip, stream);
+        cont = read_bin_data_sys(ip, stream);
         nil = jrb_nil(ip->names);
         jrb_traverse(tmp, ip->names)
         {
