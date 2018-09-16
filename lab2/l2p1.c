@@ -64,7 +64,7 @@ int main(int argc, char **argv)
             print_data(ip, stdout);
             while (1)
             {
-                searchNode = jrb_next(searchNode);
+                searchNode = jrb_prev(searchNode);
                 if (searchNode->key.s != input)
                 {
                     break;
@@ -74,6 +74,7 @@ int main(int argc, char **argv)
             }
         }
         printf("\n");
+        printf("Enter host name: ");
     }
     //print_data(cur, stdout);
     //printf("\n");
