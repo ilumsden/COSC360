@@ -177,7 +177,8 @@ void free_ip(IP *ip)
         {
             continue;
         }
-        free(tmp->val.s);
+        char *name = tmp->val.s;
+        free(name);
     }
     free_dllist(ip->names);
     free(ip->address);
