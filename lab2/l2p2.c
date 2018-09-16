@@ -15,17 +15,12 @@ int main(int argc, char **argv)
     Dllist ip_list = new_dllist();
     JRB tmp;
     JRB nil;
-    int cont = 0;
-    int test = 1;
-    while (1)
+    off_t curr_pos = lseek(stream, 0, SEEK_CUR);
+    off_t eof = lseek(stream, 0, SEEK_END);
+    while (curr_pos != eof)
     {
         ip = new_ip();
-        cont = read_bin_data_sys(ip, stream);
-        if (cont == 1)
-        {
-            break;
-        }
-        printf("test is %d\n", test);
+        read_bin_data_sys(ip, stream);
         test++;
         nil = jrb_nil(ip->names);
         jrb_traverse(tmp, ip->names)
@@ -43,6 +38,7 @@ int main(int argc, char **argv)
             jrb_insert_str(ip_tree, name, new_jval_v((void*)ip));
         }
         dll_append(ip_list, new_jval_v((void*)ip));
+        curr_pos = lseek(stream, 0, SEEK_CUR);
     }
     close(stream);
     printf("Hosts all read in\n\n");

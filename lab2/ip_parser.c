@@ -96,11 +96,12 @@ void read_bin_data_fpointer(IP *ip, FILE *stream)
         return;
 }
 
-int read_bin_data_sys(IP *ip, int stream)
+void read_bin_data_sys(IP *ip, int stream)
 {
     if ( read(stream, ip->address_nums, 4*sizeof(unsigned char)) == -1 )
     {
-        return 1;
+        fprintf(stderr, "Warning: EOF reached during read of address.\n");
+        return;
     }
     gen_address(ip);
     unsigned int numNames = 0;
@@ -109,7 +110,8 @@ int read_bin_data_sys(IP *ip, int stream)
     {
         if ( read(stream, &ch, sizeof(unsigned char)) == -1 )
         {
-            return 1;
+            fprintf(stderr, "Warning: EOF reached during read of number of names.\n");
+            return;
         }
         numNames = intcat(numNames, (unsigned int) ch);
     }
@@ -135,7 +137,8 @@ int read_bin_data_sys(IP *ip, int stream)
             }
             if ( read(stream, &c, sizeof(char)) == -1 )
             {
-                return 1;
+                fprintf(stderr, "Warning: EOF reached during character read\n");
+                return;
             }
             name[idx] = c;
             if (c == '.' && !absolute)
