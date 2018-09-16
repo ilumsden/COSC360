@@ -84,7 +84,8 @@ void read_bin_data(IP *ip, FILE *stream)
                 perror("Error: the file ended in the middle of a name read");
                 exit(-1);
             }
-            name[strlen(name)] = c;
+            int slen = strlen(name);
+            name[slen] = c;
             if (c == '.' && !absolute)
             {
                 absolute = true;
