@@ -69,6 +69,7 @@ void read_bin_data(IP *ip, FILE *stream)
     {
         name = (char*) memChk(malloc(MAX_NAME_LENGTH));
         name[0] = 0;
+        idx = 0;
         absolute = false;
         while (1)
         {
@@ -84,10 +85,10 @@ void read_bin_data(IP *ip, FILE *stream)
                 perror("Error: the file ended in the middle of a name read");
                 exit(-1);
             }
-            int slen = strlen(name);
-            printf("name is %s\n", name);
-            printf("slen is %d\n", slen);
-            name[slen] = c;
+            //int slen = strlen(name);
+            //printf("name is %s\n", name);
+            //printf("slen is %d\n", slen);
+            name[idx] = c;
             if (c == '.' && !absolute)
             {
                 absolute = true;
@@ -96,6 +97,7 @@ void read_bin_data(IP *ip, FILE *stream)
             {
                 break;
             }
+            ++idx;
         }
         dll_append(ip->names, new_jval_s(name));
         if (absolute)
@@ -143,10 +145,10 @@ void print_data(IP *ip, FILE *stream)
             continue;
         }
         char *name = (char*) tmp->val.s;
-        fprintf(stream, "name is %s\n", name);
+        //fprintf(stream, "name is %s\n", name);
         if (name == NULL || strcmp(name, "") == 0)
         {
-            perror("Error: invalid name for this IP.");
+            perror("Error: empty name.");
             exit(-1);
         }
         fprintf(stream, "%s ", name);
