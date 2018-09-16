@@ -8,6 +8,7 @@
 #include <string.h>
 #include "jval.h"
 #include "dllist.h"
+#include "jrb.h"
 
 inline void* _checkMalloc(void *ptr)
 {
