@@ -46,9 +46,9 @@ int main(int argc, char **argv)
     }
     jrb_traverse(tmp, ip_tree)
     {
-        if (tmp->val != NULL)
+        ip = (IP*) tmp->val.v;
+        if (ip != NULL)
         {
-            ip = (IP*) tmp->val.v;
             free_ip(ip);
         }
     }
