@@ -168,8 +168,7 @@ void read_bin_data_sys(IP *ip, int stream)
         }
     }
     epoint:
-        return 0;
-    return 0;
+        return;
 }
 
 void print_data(IP *ip, FILE *stream)
