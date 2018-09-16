@@ -11,7 +11,7 @@ IP* new_ip()
 {
     IP* ip = (IP*) memChk(malloc(sizeof(IP)));
     ip->names = new_dllist();
-    ip->address_nums = (unsigned char*) memChk(malloc(4*sizeof(unsigned char)));
+    //ip->address_nums = (unsigned char*) memChk(malloc(4*sizeof(unsigned char)));
     for (int i = 0; i < 4; i++)
     {
         ip->address_nums[i] = '\0';
@@ -182,6 +182,6 @@ void free_ip(IP *ip)
     }
     free_dllist(ip->names);
     free(ip->address);
-    free(ip->address_nums);
+    //free(ip->address_nums);
     free(ip);
 }

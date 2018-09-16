@@ -28,7 +28,7 @@ extern unsigned int intcat(unsigned int a, unsigned int b);
 
 typedef struct ip_data
 {
-    unsigned char* address_nums;
+    unsigned char address_nums[4];
     char *address;
     Dllist names;
 } IP;
