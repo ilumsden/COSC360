@@ -11,12 +11,14 @@ int main(int argc, char **argv)
     }
     IP *ip;
     JRB ip_tree = make_jrb();
+    Dllist ip_list = new_dllist();
+    Dllist dtmp;
+    Dllist dnil;
     while (!feof(stream))
     {
         ip = new_ip();
         read_bin_data(ip, stream);
-        Dllist dtmp;
-        Dllist dnil = dll_nil(ip->names);
+        dnil = dll_nil(ip->names);
         dll_traverse(dtmp, ip->names)
         {
             if (dtmp == dnil)
@@ -25,6 +27,7 @@ int main(int argc, char **argv)
             }
             jrb_insert_str(ip_tree, dtmp->val.s, new_jval_v((void*)ip));
         }
+        dll_append(ip_list, new_jval_v((void*)ip));
     }
     fclose(stream);
     JRB tmp;
@@ -44,13 +47,16 @@ int main(int argc, char **argv)
         print_data(cur, stdout);
         printf("\n");
     }
-    jrb_traverse(tmp, ip_tree)
+    dnil = dll_nil(ip_list);
+    dll_traverse(dtmp, ip_list)
     {
-        ip = (IP*) tmp->val.v;
-        if (ip != NULL)
+        if (dtmp == dnil)
         {
-            free_ip(ip);
+            continue;
         }
+        ip = (IP*) dtmp->val.v;
+        free_ip(ip);
     }
     jrb_free_tree(ip_tree);
+    free_dllist(ip_list);
 }
