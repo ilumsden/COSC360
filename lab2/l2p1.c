@@ -72,7 +72,7 @@ int main(int argc, char **argv)
         else
         {
             ip = (IP*) searchNode->val.v;
-            jrb_insert_str(alphabetizer, jrb_first(ip->names)->val.s, new_jval_v((void*)ip));
+            jrb_insert_str(alphabetizer, jrb_first(ip->names)->key.s, new_jval_v((void*)ip));
             //print_data(ip, stdout);
             //printf("\n");
             while (1)
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
                     break;
                 }
                 ip = (IP*) searchNode->val.v;
-                jrb_insert_str(alphabetizer, jrb_first(ip->names)->val.s, new_jval_v((void*)ip));
+                jrb_insert_str(alphabetizer, jrb_first(ip->names)->key.s, new_jval_v((void*)ip));
                 //print_data(ip, stdout);
                 //printf("\n");
             }
