@@ -25,6 +25,7 @@ int main(int argc, char **argv)
                 continue;
             }
             char *name = tmp->key.s;
+            printf("name: %s\n", name);
             if (name == NULL || strcmp(name, "") == 0)
             {
                 perror("Error: name is empty before insert");
