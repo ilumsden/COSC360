@@ -10,6 +10,7 @@ int main(int argc, char **argv)
     }
     IP *ip;
     JRB ip_tree = make_jrb();
+    JRB alphabetizer = make_jrb();
     Dllist ip_list = new_dllist();
     JRB tmp;
     JRB nil;
@@ -71,8 +72,9 @@ int main(int argc, char **argv)
         else
         {
             ip = (IP*) searchNode->val.v;
-            print_data(ip, stdout);
-            printf("\n");
+            jrb_insert_str(alphabetizer, dll_first(ip->names)->val.s, new_jval_v((void*)ip));
+            //print_data(ip, stdout);
+            //printf("\n");
             while (1)
             {
                 searchNode = jrb_prev(searchNode);
@@ -82,10 +84,24 @@ int main(int argc, char **argv)
                     break;
                 }
                 ip = (IP*) searchNode->val.v;
-                print_data(ip, stdout);
-                printf("\n");
+                jrb_insert_str(alphabetizer, dll_first(ip->names)->val.s, new_jval_v((void*)ip));
+                //print_data(ip, stdout);
+                //printf("\n");
             }
         }
+        nil = jrb_nil(alphabetizer);
+        jrb_traverse(tmp, alphabetizer)
+        {
+            if (tmp == nil)
+            {
+                continue;
+            }
+            ip = (IP*) tmp->val.v;
+            print_data(ip, stdout);
+            printf("\n");
+        }
+        jrb_free_tree(alphabetizer);
+        alphabetizer = make_jrb();
         printf("Enter host name: ");
     }
     //print_data(cur, stdout);
