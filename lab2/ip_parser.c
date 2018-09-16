@@ -104,6 +104,7 @@ void read_bin_data_sys(IP *ip, int stream)
         return;
     }
     gen_address(ip);
+    printf("Address is %s\n", ip->address);
     unsigned int numNames = 0;
     unsigned char ch = 0;
     for (int i = 0; i < 4; i++)
