@@ -80,7 +80,6 @@ void read_bin_data(IP *ip, FILE *stream)
             {
                 name[idx] = '\0';
                 printf("Could not read full name. Extracted name is %s\n", name);
-                locallen = idx+2;
                 break;
             }
             char c = (char) fgetc(stream);
@@ -95,11 +94,11 @@ void read_bin_data(IP *ip, FILE *stream)
             name[idx] = c;
             if (c == '.' && !absolute)
             {
+                locallen = idx+2;
                 absolute = true;
             }
             if (c == '\0')
             {
-                locallen = idx+2;
                 break;
             }
             ++idx;
