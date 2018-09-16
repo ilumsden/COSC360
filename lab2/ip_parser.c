@@ -64,12 +64,14 @@ void read_bin_data(IP *ip, FILE *stream)
     //printf("numNames is %d\n", numNames);
     char *name;
     int idx;
+    int locallen;
     bool absolute;
     for (int i = 0; i < numNames; i++)
     {
         name = (char*) memChk(malloc(MAX_NAME_LENGTH));
         name[0] = 0;
         idx = 0;
+        locallen = 0;
         absolute = false;
         while (1)
         {
@@ -77,6 +79,7 @@ void read_bin_data(IP *ip, FILE *stream)
             {
                 name[idx] = '\0';
                 printf("Could not read full name. Extracted name is %s\n", name);
+                locallen = idx+2;
                 break;
             }
             char c = (char) fgetc(stream);
@@ -95,6 +98,7 @@ void read_bin_data(IP *ip, FILE *stream)
             }
             if (c == '\0')
             {
+                locallen = idx+2;
                 break;
             }
             ++idx;
@@ -102,16 +106,18 @@ void read_bin_data(IP *ip, FILE *stream)
         dll_append(ip->names, new_jval_s(name));
         if (absolute)
         {
-            char *end_ptr = strtok(name, ".");
-            printf("end_ptr is %c. name is %s\n", *end_ptr, name);
+            //char *end_ptr = strtok(name, ".");
+            //printf("end_ptr is %c. name is %s\n", *end_ptr, name);
             if (end_ptr == NULL)
             {
                 fprintf(stderr, "Internal Error: Name (%s) is supposedly absolute, but could not find dot", name);
                 goto epoint;
             }
-            int len = end_ptr - name;
-            printf("len is %d\n", len);
-            char *local = (char*) memChk(malloc(len));
+            //int len = end_ptr - name;
+            //printf("len is %d\n", len);
+            //char *local = (char*) memChk(malloc(len));
+            char *local = (char*) memChk(malloc(locallen));
+            local[0] = 0;
             for (int i = 0; i < len; i++)
             {
                 local[i] = name[i];
