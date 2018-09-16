@@ -50,8 +50,8 @@ int main(int argc, char **argv)
             perror("Internal Error: tree node does not contain an IP object.");
             return -1;
         }
-        //print_data(cur, stdout);
-        //printf("\n");
+        print_data(cur, stdout);
+        printf("\n");
     }
     dnil = dll_nil(ip_list);
     dll_traverse(dtmp, ip_list)
