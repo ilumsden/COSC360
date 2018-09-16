@@ -155,13 +155,14 @@ void print_data(IP *ip, FILE *stream)
             continue;
         }
         char *name = (char*) tmp->val.s;
+        printf("name is %s\n", name);
         //fprintf(stream, "name is %s\n", name);
         if (name == NULL || strcmp(name, "") == 0)
         {
             perror("Error: empty name.");
             exit(-1);
         }
-        fprintf(stream, "%s ", name);
+        //fprintf(stream, "%s ", name);
     }
 }
 
