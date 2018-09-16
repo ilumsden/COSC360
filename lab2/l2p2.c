@@ -48,11 +48,6 @@ int main(int argc, char **argv)
     while (!feof(stdin))
     {
         scanf("%s", input);
-        if (feof(stdin))
-        {
-            fprintf(stderr, "Error: stdin closed in the middle of a read.\n");
-            return -1;
-        }
         if (ferror(stdin))
         {
             fprintf(stderr, "Error: could not successfully read user input\n");
@@ -93,6 +88,7 @@ int main(int argc, char **argv)
         alphabetizer = make_jrb();
         printf("Enter host name: ");
     }
+    jrb_free_tree(alphabetizer);
     Dllist dtmp;
     Dllist dnil = dll_nil(ip_list);
     dll_traverse(dtmp, ip_list)
