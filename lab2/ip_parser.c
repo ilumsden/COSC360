@@ -103,7 +103,7 @@ void read_bin_data(IP *ip, FILE *stream)
         if (absolute)
         {
             char *end_ptr = strtok(name, ".");
-            printf("end_ptr is %c\n", *end_ptr);
+            printf("end_ptr is %c. name is %s\n", *end_ptr, name);
             if (end_ptr == NULL)
             {
                 fprintf(stderr, "Internal Error: Name (%s) is supposedly absolute, but could not find dot", name);
