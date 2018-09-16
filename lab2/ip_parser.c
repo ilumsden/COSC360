@@ -85,6 +85,8 @@ void read_bin_data(IP *ip, FILE *stream)
                 exit(-1);
             }
             int slen = strlen(name);
+            printf("name is %s\n", name);
+            printf("slen is %d\n", slen);
             name[slen] = c;
             if (c == '.' && !absolute)
             {
