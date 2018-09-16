@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     while (!feof(stream))
     {
         ip = new_ip();
-        read_bin_data(ip, stream);
+        read_bin_data_fpointer(ip, stream);
         nil = jrb_nil(ip->names);
         jrb_traverse(tmp, ip->names)
         {
@@ -63,20 +63,15 @@ int main(int argc, char **argv)
         {
             ip = (IP*) searchNode->val.v;
             jrb_insert_str(alphabetizer, jrb_first(ip->names)->key.s, new_jval_v((void*)ip));
-            //print_data(ip, stdout);
-            //printf("\n");
             while (1)
             {
                 searchNode = jrb_prev(searchNode);
-                //printf("key is %s\n", searchNode->key.s);
                 if (strcmp(searchNode->key.s, input) != 0)
                 {
                     break;
                 }
                 ip = (IP*) searchNode->val.v;
                 jrb_insert_str(alphabetizer, jrb_first(ip->names)->key.s, new_jval_v((void*)ip));
-                //print_data(ip, stdout);
-                //printf("\n");
             }
         }
         nil = jrb_nil(alphabetizer);
@@ -94,8 +89,6 @@ int main(int argc, char **argv)
         alphabetizer = make_jrb();
         printf("Enter host name: ");
     }
-    //print_data(cur, stdout);
-    //printf("\n");
     Dllist dtmp;
     Dllist dnil = dll_nil(ip_list);
     dll_traverse(dtmp, ip_list)

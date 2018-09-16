@@ -38,7 +38,7 @@ extern IP* new_ip();
 
 extern void gen_address(IP *ip);
 
-extern void read_bin_data(IP* ip, FILE *stream);
+extern void read_bin_data_fpointer(IP* ip, FILE *stream);
 
 extern void print_data(IP *ip, FILE *stream);
 

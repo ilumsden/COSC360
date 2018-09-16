@@ -11,7 +11,6 @@ IP* new_ip()
 {
     IP* ip = (IP*) memChk(malloc(sizeof(IP)));
     ip->names = make_jrb();
-    //ip->address_nums = (unsigned char*) memChk(malloc(4*sizeof(unsigned char)));
     for (int i = 0; i < 4; i++)
     {
         ip->address_nums[i] = '\0';
@@ -27,11 +26,7 @@ void gen_address(IP *ip)
      int a1 = (int) ip->address_nums[1];
      int a2 = (int) ip->address_nums[2];
      int a3 = (int) ip->address_nums[3];
-     //char *addr = (char*) memChk(malloc(15));
-     //addr[0] = 0;
      sprintf(ip->address, "%d.%d.%d.%d", a0, a1, a2, a3);
-     //printf("addr is %s\n", ip->address);
-     //return addr;
 }
 
 void read_bin_data(IP *ip, FILE *stream)
@@ -45,24 +40,6 @@ void read_bin_data(IP *ip, FILE *stream)
         fread(&ch, sizeof(unsigned char), 1, stream);
         numNames = intcat(numNames, (unsigned int) ch);
     }
-    //printf("numNames is %d ", numNames);
-    /*char num[13];
-    num[0] = 0;
-    unsigned char comp;
-    char str_comp[4];
-    str_comp[0] = 0;
-    int int_comp;
-    for (int i = 0; i < 4; i++)
-    {
-        fread(&comp, sizeof(unsigned char), 1, stream);
-        int_comp = (int) comp;
-        sprintf(str_comp, "%d", int_comp);
-        strcpy(num+strlen(num), str_comp);
-        //strcat(num, str_comp);
-    }
-    char *endptr;
-    numNames = (int) strtoimax(num, &endptr, 10);*/
-    //printf("numNames is %d\n", numNames);
     char *name;
     int idx;
     int locallen;
@@ -88,9 +65,6 @@ void read_bin_data(IP *ip, FILE *stream)
                 perror("Error: the file ended in the middle of a name read");
                 exit(-1);
             }
-            //int slen = strlen(name);
-            //printf("name is %s\n", name);
-            //printf("slen is %d\n", slen);
             name[idx] = c;
             if (c == '.' && !absolute)
             {
@@ -106,29 +80,17 @@ void read_bin_data(IP *ip, FILE *stream)
         jrb_insert_str(ip->names, name, new_jval_v(NULL));
         if (absolute)
         {
-            //char *end_ptr = strtok(name, ".");
-            //printf("end_ptr is %c. name is %s\n", *end_ptr, name);
-            //if (end_ptr == NULL)
             if (locallen == 0)
             {
                 fprintf(stderr, "Internal Error: Name (%s) is supposedly absolute, but could not find dot", name);
                 goto epoint;
             }
-            //int len = end_ptr - name;
-            //printf("len is %d\n", len);
-            //char *local = (char*) memChk(malloc(len));
             char *local = (char*) memChk(malloc(locallen));
             local[0] = 0;
             strncpy(local, name, locallen-1);
             local[locallen-1] = 0;
-            //for (int i = 0; i < len; i++)
-            /*for (int i = 0; i < locallen-1; i++)
-            {
-                local[i] = name[i];
-            }*/
             jrb_insert_str(ip->names, local, new_jval_v(NULL));
         }
-        //printf("name is %s\n", name);
     }
     epoint:
         return;
@@ -137,18 +99,6 @@ void read_bin_data(IP *ip, FILE *stream)
 void print_data(IP *ip, FILE *stream)
 {
     fprintf(stream, "%s: ", ip->address);
-    /*for (int i = 0; i < 4; i++)
-    {
-        fprintf(stream, "%d", (int)ip->address[i]);
-        if (i != 3)
-        {
-            fprintf(stream, ".");
-        }
-        else
-        {
-            fprintf(stream, ": ");
-        }
-    }*/
     JRB tmp;
     JRB nil = jrb_nil(ip->names);
     jrb_traverse(tmp, ip->names)
@@ -158,8 +108,6 @@ void print_data(IP *ip, FILE *stream)
             continue;
         }
         char *name = (char*) tmp->key.s;
-        //printf("name is %s\n", name);
-        //fprintf(stream, "name is %s\n", name);
         if (name == NULL || strcmp(name, "") == 0)
         {
             perror("Error: empty name.");
@@ -185,6 +133,5 @@ void free_ip(IP *ip)
     }
     jrb_free_tree(ip->names);
     free(ip->address);
-    //free(ip->address_nums);
     free(ip);
 }
