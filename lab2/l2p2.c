@@ -16,6 +16,7 @@ int main(int argc, char **argv)
     JRB tmp;
     JRB nil;
     int cont = 0;
+    int test = 1;
     while (1)
     {
         ip = new_ip();
@@ -24,7 +25,8 @@ int main(int argc, char **argv)
         {
             break;
         }
-        printf("cont is %d\n", cont);
+        printf("test is %d\n", test);
+        test++;
         nil = jrb_nil(ip->names);
         jrb_traverse(tmp, ip->names)
         {
