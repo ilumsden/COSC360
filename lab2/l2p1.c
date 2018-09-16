@@ -56,7 +56,7 @@ int main(int argc, char **argv)
         searchNode = jrb_find_str(ip_tree, input);
         if (searchNode == NULL)
         {
-            printf("no key %s\n");
+            printf("no key %s\n", input);
         }
         else
         {
