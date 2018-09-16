@@ -45,7 +45,7 @@ void read_bin_data(IP *ip, FILE *stream)
         fread(&ch, sizeof(unsigned char), 1, stream);
         numNames = intcat(numNames, (unsigned int) ch);
     }
-    printf("numNames is %d\n", numNames);
+    printf("numNames is %d ", numNames);
     /*char num[13];
     num[0] = 0;
     unsigned char comp;
@@ -127,9 +127,10 @@ void read_bin_data(IP *ip, FILE *stream)
             }
             dll_append(ip->names, new_jval_s(local));
         }
+        printf("name is %s\n", name);
+    }
     epoint:
         return;
-    }
 }
 
 void print_data(IP *ip, FILE *stream)
