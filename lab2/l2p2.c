@@ -21,7 +21,6 @@ int main(int argc, char **argv)
     {
         ip = new_ip();
         read_bin_data_sys(ip, stream);
-        test++;
         nil = jrb_nil(ip->names);
         jrb_traverse(tmp, ip->names)
         {
