@@ -40,6 +40,7 @@ else()
 endif()
 
 #add_executable(l2p1 ${lab2_src} ${lab2_headers})
+add_executable(l2p1 "${PROJECT_SOURCE_DIR}/l2p1.c")
 
 if(PERSONAL)
     target_link_libraries(l2p1 PRIVATE fdr)
