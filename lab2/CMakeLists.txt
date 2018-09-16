@@ -26,16 +26,25 @@ endif()
 file(GLOB lab2_src "${PROJECT_SOURCE_DIR}/*.c")
 file(GLOB lab2_headers "${PROJECT_SOURCE_DIR}/*.h")
 
+list(REMOVE_ITEM lab2_src "${PROJECT_SOURCE_DIR}/l2p1.c")
+message(STATUS "list is ${lab2_src}")
+#list(REMOVE_ITEM lab2_src "${PROJECT_SOURCE_DIR}/l2p2.c")
+#list(REMOVE_ITEM lab2_src "${PROJECT_SOURCE_DIR}/l2p3.c")
+
+add_library(l2 STATIC ${lab2_src} ${lab2_headers})
+
 if(PERSONAL)
     include_directories(${PROJECT_SOURCE_DIR}/../libfdr/include)
 else()
     include_directories(/home/plank/cs360/include)
 endif()
 
-add_executable(l2p1 ${lab2_src} ${lab2_headers})
+#add_executable(l2p1 ${lab2_src} ${lab2_headers})
 
 if(PERSONAL)
     target_link_libraries(l2p1 PRIVATE fdr)
+    target_link_libraries(l2p1 PRIVATE l2)
 else()
     target_link_libraries(l2p1 PRIVATE /home/plank/cs360/objs/libfdr.a)
+    target_link_libraries(l2p1 PRIVATE l2)
 endif()
