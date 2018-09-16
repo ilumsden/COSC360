@@ -103,6 +103,7 @@ void read_bin_data_sys(IP *ip, int stream)
         fprintf(stderr, "Warning: EOF reached during read of address.\n");
         return;
     }
+    printf("Address Nums are %s\n", ip->address_nums);
     gen_address(ip);
     printf("Address is %s\n", ip->address);
     unsigned int numNames = 0;
