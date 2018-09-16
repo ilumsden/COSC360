@@ -16,11 +16,10 @@ int main(int argc, char **argv)
     JRB tmp;
     JRB nil;
     off_t curr_pos = lseek(stream, 0, SEEK_CUR);
-    printf("curr_pos is %d\n", (int) curr_pos);
     off_t eof = lseek(stream, 0, SEEK_END);
-    printf("eof_pos is %d\n", (int) eof);
     while (curr_pos != eof)
     {
+        printf("In read\n");
         ip = new_ip();
         read_bin_data_sys(ip, stream);
         nil = jrb_nil(ip->names);
