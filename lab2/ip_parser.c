@@ -98,7 +98,7 @@ void read_bin_data_fpointer(IP *ip, FILE *stream)
 
 int read_bin_data_sys(IP *ip, int stream)
 {
-    if ( read(stream, ip->address_nums, 4*sizeof(unsigned char)) < 0 )
+    if ( read(stream, ip->address_nums, 4*sizeof(unsigned char)) == -1 )
     {
         return 1;
     }
@@ -107,7 +107,7 @@ int read_bin_data_sys(IP *ip, int stream)
     unsigned char ch = 0;
     for (int i = 0; i < 4; i++)
     {
-        if ( read(stream, &ch, sizeof(unsigned char)) < 0 )
+        if ( read(stream, &ch, sizeof(unsigned char)) == -1 )
         {
             return 1;
         }
@@ -133,7 +133,7 @@ int read_bin_data_sys(IP *ip, int stream)
                 printf("Could not read full name. Extracted name is %s\n", name);
                 break;
             }
-            if ( read(stream, &c, sizeof(char)) < 0 )
+            if ( read(stream, &c, sizeof(char)) == -1 )
             {
                 return 1;
             }
