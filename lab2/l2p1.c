@@ -12,20 +12,20 @@ int main(int argc, char **argv)
     IP *ip;
     JRB ip_tree = make_jrb();
     Dllist ip_list = new_dllist();
-    Dllist dtmp;
-    Dllist dnil;
+    JRB tmp;
+    JRB nil;
     while (!feof(stream))
     {
         ip = new_ip();
         read_bin_data(ip, stream);
-        dnil = dll_nil(ip->names);
-        dll_traverse(dtmp, ip->names)
+        nil = jrb_nil(ip->names);
+        jrb_traverse(dtmp, ip->names)
         {
             if (dtmp == dnil)
             {
                 continue;
             }
-            char *name = dtmp->val.s;
+            char *name = dtmp->key.s;
             if (name == NULL || strcmp(name, "") == 0)
             {
                 perror("Error: name is empty before insert");

@@ -10,7 +10,7 @@ unsigned int intcat(unsigned int a, unsigned int b)
 IP* new_ip()
 {
     IP* ip = (IP*) memChk(malloc(sizeof(IP)));
-    ip->names = new_dllist();
+    ip->names = make_jrb();
     //ip->address_nums = (unsigned char*) memChk(malloc(4*sizeof(unsigned char)));
     for (int i = 0; i < 4; i++)
     {
@@ -103,7 +103,7 @@ void read_bin_data(IP *ip, FILE *stream)
             }
             ++idx;
         }
-        dll_append(ip->names, new_jval_s(name));
+        jrb_insert_str(ip->names, name, new_jval_v(NULL));
         if (absolute)
         {
             //char *end_ptr = strtok(name, ".");
@@ -126,7 +126,7 @@ void read_bin_data(IP *ip, FILE *stream)
             {
                 local[i] = name[i];
             }*/
-            dll_append(ip->names, new_jval_s(local));
+            jrb_insert_str(ip->names, local, new_jval_v(NULL));
         }
         //printf("name is %s\n", name);
     }
@@ -149,15 +149,15 @@ void print_data(IP *ip, FILE *stream)
             fprintf(stream, ": ");
         }
     }*/
-    Dllist tmp;
-    Dllist nil = dll_nil(ip->names);
-    dll_traverse(tmp, ip->names)
+    JRB tmp;
+    JRB nil = jrb_nil(ip->names);
+    jrb_traverse(tmp, ip->names)
     {
         if (tmp == nil)
         {
             continue;
         }
-        char *name = (char*) tmp->val.s;
+        char *name = (char*) tmp->key.s;
         //printf("name is %s\n", name);
         //fprintf(stream, "name is %s\n", name);
         if (name == NULL || strcmp(name, "") == 0)
@@ -172,18 +172,18 @@ void print_data(IP *ip, FILE *stream)
 
 void free_ip(IP *ip)
 {
-    Dllist tmp;
-    Dllist nil = dll_nil(ip->names);
-    dll_traverse(tmp, ip->names)
+    JRB tmp;
+    JRB nil = jrb_nil(ip->names);
+    jrb_traverse(tmp, ip->names)
     {
         if (tmp == nil)
         {
             continue;
         }
-        char *name = tmp->val.s;
+        char *name = tmp->key.s;
         free(name);
     }
-    free_dllist(ip->names);
+    jrb_free_tree(ip->names);
     free(ip->address);
     //free(ip->address_nums);
     free(ip);

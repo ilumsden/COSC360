@@ -30,7 +30,7 @@ typedef struct ip_data
 {
     unsigned char address_nums[4];
     char *address;
-    Dllist names;
+    JRB names;
 } IP;
 
 extern IP* new_ip();
