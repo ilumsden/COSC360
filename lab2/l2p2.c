@@ -20,6 +20,7 @@ int main(int argc, char **argv)
     {
         ip = new_ip();
         cont = read_bin_data_sys(ip, stream);
+        printf("cont is %d\n", cont);
         nil = jrb_nil(ip->names);
         jrb_traverse(tmp, ip->names)
         {
