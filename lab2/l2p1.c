@@ -25,7 +25,6 @@ int main(int argc, char **argv)
                 continue;
             }
             char *name = tmp->key.s;
-            printf("name: %s\n", name);
             if (name == NULL || strcmp(name, "") == 0)
             {
                 perror("Error: name is empty before insert");
@@ -36,7 +35,18 @@ int main(int argc, char **argv)
         dll_append(ip_list, new_jval_v((void*)ip));
     }
     fclose(stream);
-    printf("Hosts all read in\n\n");
+    nil = jrb_nil(ip_tree);
+    jrb_traverse(tmp, ip_tree)
+    {
+        if (tmp == nil)
+        {
+            printf("Failure\n");
+            return -1;
+        }
+        IP *itmp = (IP*) tmp->val.v;
+        print_data(itmp, stdout);
+    }
+    /*printf("Hosts all read in\n\n");
     char input[MAX_NAME_LENGTH];
     input[0] = 0;
     printf("Enter host name: ");
@@ -77,7 +87,7 @@ int main(int argc, char **argv)
             }
         }
         printf("Enter host name: ");
-    }
+    }*/
     //print_data(cur, stdout);
     //printf("\n");
     Dllist dtmp;
