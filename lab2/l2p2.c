@@ -19,7 +19,6 @@ int main(int argc, char **argv)
     off_t eof = lseek(stream, 0, SEEK_END);
     while (curr_pos != eof)
     {
-        printf("In read\n");
         ip = new_ip();
         read_bin_data_sys(ip, stream);
         nil = jrb_nil(ip->names);
@@ -46,8 +45,9 @@ int main(int argc, char **argv)
     input[0] = 0;
     printf("Enter host name: ");
     JRB searchNode;
-    while ( scanf("%s", input) < 0 )
+    while (!feof(stdin))
     {
+        scanf("%s", input);
         if (feof(stdin))
         {
             fprintf(stderr, "Error: stdin closed in the middle of a read.\n");
