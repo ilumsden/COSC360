@@ -45,6 +45,7 @@ void read_bin_data(IP *ip, FILE *stream)
         fread(&ch, sizeof(unsigned char), 1, stream);
         numNames = intcat(numNames, (unsigned int) ch);
     }
+    printf("numNames is %d\n", numNames);
     /*char num[13];
     num[0] = 0;
     unsigned char comp;
@@ -155,14 +156,14 @@ void print_data(IP *ip, FILE *stream)
             continue;
         }
         char *name = (char*) tmp->val.s;
-        printf("name is %s\n", name);
-        //fprintf(stream, "name is %s\n", name);
+        //printf("name is %s\n", name);
+        fprintf(stream, "name is %s\n", name);
         if (name == NULL || strcmp(name, "") == 0)
         {
             perror("Error: empty name.");
             exit(-1);
         }
-        //fprintf(stream, "%s ", name);
+        fprintf(stream, "%s ", name);
     }
 }
 
