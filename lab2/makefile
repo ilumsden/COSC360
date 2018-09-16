@@ -11,4 +11,4 @@ l2p3:
 	rm -rf build; mkdir build; cd build; cmake -DPART3=ON -DALL=OFF ..; make; mv l2p3 ..
 
 clean:
-	rm famtree; rm -rf build;
+	rm l2p1; rm l2p2; rm l2p3; rm -rf build;
