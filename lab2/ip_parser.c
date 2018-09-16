@@ -92,7 +92,7 @@ void read_bin_data(IP *ip, FILE *stream)
         dll_append(ip->names, new_jval_s(name));
         if (absolute)
         {
-            char *end_ptr = strchr(name, '.');
+            char *end_ptr = strtok(name, '.');
             if (end_ptr == NULL)
             {
                 fprintf(stderr, "Internal Error: Name (%s) is supposedly absolute, but could not find dot", name);
