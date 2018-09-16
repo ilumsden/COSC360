@@ -61,6 +61,7 @@ int main(int argc, char **argv)
         {
             ip = (IP*) searchNode->val.v;
             print_data(ip, stdout);
+            printf("\n");
             while (1)
             {
                 searchNode = jrb_prev(searchNode);
@@ -71,9 +72,9 @@ int main(int argc, char **argv)
                 }
                 ip = (IP*) searchNode->val.v;
                 print_data(ip, stdout);
+                printf("\n");
             }
         }
-        printf("\n");
         printf("Enter host name: ");
     }
     //print_data(cur, stdout);
