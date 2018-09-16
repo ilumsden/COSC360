@@ -94,7 +94,7 @@ void read_bin_data(IP *ip, FILE *stream)
             name[idx] = c;
             if (c == '.' && !absolute)
             {
-                locallen = idx+1;
+                locallen = idx;
                 absolute = true;
             }
             if (c == '\0')
@@ -117,13 +117,14 @@ void read_bin_data(IP *ip, FILE *stream)
             //int len = end_ptr - name;
             //printf("len is %d\n", len);
             //char *local = (char*) memChk(malloc(len));
-            char *local = (char*) memChk(malloc(locallen+1));
+            char *local = (char*) memChk(malloc(locallen));
             local[0] = 0;
+            strncpy(local, name, locallen-1);
             //for (int i = 0; i < len; i++)
-            for (int i = 0; i < locallen-1; i++)
+            /*for (int i = 0; i < locallen-1; i++)
             {
                 local[i] = name[i];
-            }
+            }*/
             dll_append(ip->names, new_jval_s(local));
         }
         //printf("name is %s\n", name);
