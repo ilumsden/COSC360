@@ -120,6 +120,7 @@ void read_bin_data(IP *ip, FILE *stream)
             char *local = (char*) memChk(malloc(locallen));
             local[0] = 0;
             strncpy(local, name, locallen-1);
+            local[locallen-1] = 0;
             printf("local is %s\n", local);
             //for (int i = 0; i < len; i++)
             /*for (int i = 0; i < locallen-1; i++)
