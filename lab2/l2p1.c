@@ -65,7 +65,8 @@ int main(int argc, char **argv)
             while (1)
             {
                 searchNode = jrb_prev(searchNode);
-                if (searchNode->key.s != input)
+                //printf("key is %s\n", searchNode->key.s);
+                if (strcmp(searchNode->key.s, input) != 0)
                 {
                     break;
                 }
