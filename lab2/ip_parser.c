@@ -167,6 +167,7 @@ void print_data(IP *ip, FILE *stream)
         }
         fprintf(stream, "%s ", name);
     }
+    fprintf(stream, "\n");
 }
 
 void free_ip(IP *ip)
