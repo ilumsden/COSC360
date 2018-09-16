@@ -94,7 +94,7 @@ void read_bin_data(IP *ip, FILE *stream)
             name[idx] = c;
             if (c == '.' && !absolute)
             {
-                locallen = idx;
+                locallen = idx+1;
                 absolute = true;
             }
             if (c == '\0')
