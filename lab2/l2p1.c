@@ -35,7 +35,7 @@ int main(int argc, char **argv)
         dll_append(ip_list, new_jval_v((void*)ip));
     }
     fclose(stream);
-    nil = jrb_nil(ip_tree);
+    /*nil = jrb_nil(ip_tree);
     jrb_traverse(tmp, ip_tree)
     {
         if (tmp == nil)
@@ -45,8 +45,8 @@ int main(int argc, char **argv)
         }
         IP *itmp = (IP*) tmp->val.v;
         print_data(itmp, stdout);
-    }
-    /*printf("Hosts all read in\n\n");
+    }*/
+    printf("Hosts all read in\n\n");
     char input[MAX_NAME_LENGTH];
     input[0] = 0;
     printf("Enter host name: ");
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
             }
         }
         printf("Enter host name: ");
-    }*/
+    }
     //print_data(cur, stdout);
     //printf("\n");
     Dllist dtmp;
