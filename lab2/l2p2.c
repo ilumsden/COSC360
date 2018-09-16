@@ -3,7 +3,7 @@
 
 int main(int argc, char **argv)
 {
-    int stream = fopen("converted", O_RDONLY);
+    int stream = open("converted", O_RDONLY);
     if (stream < 0)
     {
         perror("Error: could not open converted.");
@@ -37,7 +37,7 @@ int main(int argc, char **argv)
         }
         dll_append(ip_list, new_jval_v((void*)ip));
     }
-    fclose(stream);
+    close(stream);
     printf("Hosts all read in\n\n");
     char input[MAX_NAME_LENGTH];
     input[0] = 0;
