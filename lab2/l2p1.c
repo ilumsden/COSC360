@@ -18,13 +18,13 @@ int main(int argc, char **argv)
         ip = new_ip();
         read_bin_data(ip, stream);
         nil = jrb_nil(ip->names);
-        jrb_traverse(dtmp, ip->names)
+        jrb_traverse(tmp, ip->names)
         {
-            if (dtmp == dnil)
+            if (tmp == nil)
             {
                 continue;
             }
-            char *name = dtmp->key.s;
+            char *name = tmp->key.s;
             if (name == NULL || strcmp(name, "") == 0)
             {
                 perror("Error: name is empty before insert");
@@ -78,7 +78,8 @@ int main(int argc, char **argv)
     }
     //print_data(cur, stdout);
     //printf("\n");
-    dnil = dll_nil(ip_list);
+    Dllist dtmp;
+    Dllist dnil = dll_nil(ip_list);
     dll_traverse(dtmp, ip_list)
     {
         if (dtmp == dnil)
