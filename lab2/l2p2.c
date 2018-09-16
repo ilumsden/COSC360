@@ -16,10 +16,14 @@ int main(int argc, char **argv)
     JRB tmp;
     JRB nil;
     int cont = 0;
-    while (!feof(stream))
+    while (1)
     {
         ip = new_ip();
         cont = read_bin_data_sys(ip, stream);
+        if (cont == 1)
+        {
+            break;
+        }
         printf("cont is %d\n", cont);
         nil = jrb_nil(ip->names);
         jrb_traverse(tmp, ip->names)
