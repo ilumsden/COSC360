@@ -36,23 +36,47 @@ int main(int argc, char **argv)
         dll_append(ip_list, new_jval_v((void*)ip));
     }
     fclose(stream);
-    JRB tmp;
-    JRB nil = jrb_nil(ip_tree);
-    jrb_traverse(tmp, ip_tree)
+    printf("Hosts all read in\n\n");
+    char input[MAX_NAME_LENGTH];
+    input[0] = 0;
+    printf("Enter host name: ");
+    JRB searchNode;
+    while (!feof(stdin))
     {
-        if (tmp == nil)
+        scanf("%s", input);
+        if (feof(stdin))
         {
-            continue;
-        }
-        IP *cur = (IP*) tmp->val.v;
-        if (cur == NULL)
-        {
-            perror("Internal Error: tree node does not contain an IP object.");
+            fprintf(stderr, "Error: stdin closed in the middle of a read.\n");
             return -1;
         }
-        print_data(cur, stdout);
+        if (ferror(stdin))
+        {
+            fprintf(stderr, "Error: could not successfully read user input\n");
+        }
+        searchNode = jrb_find_str(ip_tree, input);
+        if (searchNode == NULL)
+        {
+            printf("no key %s\n");
+        }
+        else
+        {
+            ip = (IP*) searchNode->val.v;
+            print_data(ip, stdout);
+            while (1)
+            {
+                searchNode = jrb_next(searchNode);
+                if (searchNode->key.s != input)
+                {
+                    break;
+                }
+                ip = (IP*) searchNode->val.v;
+                print_data(ip, stdout);
+            }
+        }
         printf("\n");
     }
+    //print_data(cur, stdout);
+    //printf("\n");
     dnil = dll_nil(ip_list);
     dll_traverse(dtmp, ip_list)
     {
