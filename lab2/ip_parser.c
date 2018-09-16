@@ -124,6 +124,7 @@ void read_bin_data(IP *ip, FILE *stream)
             {
                 local[i] = name[i];
             }
+            printf("local is %s\n", local);
             dll_append(ip->names, new_jval_s(local));
         }
         //printf("name is %s\n", name);
