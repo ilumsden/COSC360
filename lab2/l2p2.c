@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     JRB tmp;
     JRB nil;
     int cont = 0;
-    while (!cont)
+    while (!feof(stream))
     {
         ip = new_ip();
         cont = read_bin_data_sys(ip, stream);
