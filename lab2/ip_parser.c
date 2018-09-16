@@ -79,7 +79,7 @@ void read_bin_data(IP *ip, FILE *stream)
                 break;
             }
             char c = (char) fgetc(stream);
-            if (feof(c))
+            if (feof(stream))
             {
                 perror("Error: the file ended in the middle of a name read");
                 exit(-1);
