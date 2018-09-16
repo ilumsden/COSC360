@@ -36,17 +36,6 @@ int main(int argc, char **argv)
         dll_append(ip_list, new_jval_v((void*)ip));
     }
     fclose(stream);
-    /*nil = jrb_nil(ip_tree);
-    jrb_traverse(tmp, ip_tree)
-    {
-        if (tmp == nil)
-        {
-            printf("Failure\n");
-            return -1;
-        }
-        IP *itmp = (IP*) tmp->val.v;
-        print_data(itmp, stdout);
-    }*/
     printf("Hosts all read in\n\n");
     char input[MAX_NAME_LENGTH];
     input[0] = 0;
@@ -68,6 +57,7 @@ int main(int argc, char **argv)
         if (searchNode == NULL)
         {
             printf("no key %s\n", input);
+            printf("\n");
         }
         else
         {
