@@ -243,7 +243,7 @@ void read_bin_data_buf(IP *ip, char *buf, int *current_loc)
 
 void print_data(IP *ip, FILE *stream)
 {
-    fprintf(stream, "%s: ", ip->address);
+    fprintf(stream, "%s:  ", ip->address);
     JRB tmp;
     JRB nil = jrb_nil(ip->names);
     jrb_traverse(tmp, ip->names)

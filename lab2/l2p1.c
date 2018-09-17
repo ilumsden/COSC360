@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     printf("Hosts all read in\n\n");
     char input[MAX_NAME_LENGTH];
     input[0] = 0;
-    printf("Enter host name: ");
+    printf("Enter host name:  ");
     JRB searchNode;
     while (!feof(stdin))
     {
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
         }
         jrb_free_tree(alphabetizer);
         alphabetizer = make_jrb();
-        printf("Enter host name: ");
+        printf("Enter host name:  ");
     }
     jrb_free_tree(alphabetizer);
     Dllist dtmp;
