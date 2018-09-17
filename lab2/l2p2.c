@@ -44,7 +44,7 @@ int main(int argc, char **argv)
     printf("Hosts all read in\n\n");
     char input[MAX_NAME_LENGTH];
     input[0] = 0;
-    printf("Enter host name: ");
+    printf("Enter host name:  ");
     JRB searchNode;
     while (!feof(stdin))
     {
@@ -62,7 +62,14 @@ int main(int argc, char **argv)
         else
         {
             ip = (IP*) searchNode->val.v;
-            jrb_insert_str(alphabetizer, jrb_first(ip->names)->key.s, new_jval_v((void*)ip));
+            if (ip->num_names == 1)
+            {
+                jrb_insert_str(alphabetizer, jrb_first(ip->names)->key.s, new_jval_v((void*)ip));
+            }
+            else
+            {
+                jrb_insert_str(alphabetizer, jrb_next(jrb_first(ip->names))->key.s, new_jval_v((void*)ip));
+            }
             while (1)
             {
                 searchNode = jrb_prev(searchNode);
@@ -71,7 +78,14 @@ int main(int argc, char **argv)
                     break;
                 }
                 ip = (IP*) searchNode->val.v;
-                jrb_insert_str(alphabetizer, jrb_first(ip->names)->key.s, new_jval_v((void*)ip));
+                if (ip->num_names == 1)
+                {
+                    jrb_insert_str(alphabetizer, jrb_first(ip->names)->key.s, new_jval_v((void*)ip));
+                }
+                else
+                {
+                    jrb_insert_str(alphabetizer, jrb_next(jrb_first(ip->names))->key.s, new_jval_v((void*)ip));
+                }
             }
         }
         nil = jrb_nil(alphabetizer);

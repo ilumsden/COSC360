@@ -156,6 +156,7 @@ void read_bin_data_sys(IP *ip, int stream)
             ++idx;
         }
         jrb_insert_str(ip->names, name, new_jval_v(NULL));
+        ip->num_names++;
         if (absolute)
         {
             if (locallen == 0)
@@ -168,6 +169,7 @@ void read_bin_data_sys(IP *ip, int stream)
             strncpy(local, name, locallen-1);
             local[locallen-1] = 0;
             jrb_insert_str(ip->names, local, new_jval_v(NULL));
+            ip->num_names++;
         }
     }
     epoint:
@@ -223,6 +225,7 @@ void read_bin_data_buf(IP *ip, char *buf, int *current_loc)
             ++idx;
         }
         jrb_insert_str(ip->names, name, new_jval_v(NULL));
+        ip->num_names++;
         if (absolute)
         {
             if (locallen == 0)
@@ -235,6 +238,7 @@ void read_bin_data_buf(IP *ip, char *buf, int *current_loc)
             strncpy(local, name, locallen-1);
             local[locallen-1] = 0;
             jrb_insert_str(ip->names, local, new_jval_v(NULL));
+            ip->num_names++;
         }
     }
     epoint:
