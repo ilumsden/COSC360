@@ -18,7 +18,6 @@ int main(int argc, char **argv)
     char buffer[350000];
     read(stream, buffer, 350000);
     int read_idx = 0;
-    char *buf_init = buffer;
     while (read_idx != 350000)
     {
         ip = new_ip();
