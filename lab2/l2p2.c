@@ -38,6 +38,7 @@ int main(int argc, char **argv)
         }
         dll_append(ip_list, new_jval_v((void*)ip));
         curr_pos = lseek(stream, 0, SEEK_CUR);
+        printf("curr_pos is %d\n  eof is %d\n", (int) curr_pos, (int) eof);
     }
     close(stream);
     printf("Hosts all read in\n\n");
