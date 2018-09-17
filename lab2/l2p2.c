@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     JRB nil;
     off_t curr_pos = lseek(stream, 0, SEEK_CUR);
     off_t eof = lseek(stream, 0, SEEK_END);
-    lseek(steam, 0, SEEK_SET);
+    lseek(stream, 0, SEEK_SET);
     while (curr_pos != eof)
     {
         ip = new_ip();
