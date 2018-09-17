@@ -15,10 +15,12 @@ int main(int argc, char **argv)
     Dllist ip_list = new_dllist();
     JRB tmp;
     JRB nil;
-    char buffer[350000];
-    read(stream, buffer, 350000);
+    int size = (int) lseek(stream, 0, SEEK_END);
+    lseek(stream, 0, SEEK_SET);
+    char buffer[size];
+    read(stream, buffer, size);
     int read_idx = 0;
-    while (read_idx != 350000)
+    while (read_idx != size)
     {
         ip = new_ip();
         read_bin_data_buf(ip, buffer, &read_idx);
