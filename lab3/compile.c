@@ -167,7 +167,7 @@ void add_libraries(Compile *compilation, char **fields, int NF)
                 fprintf(stderr, "Error: %s does not exist.\n", file);
                 exit(-1);
             }
-            else if ((file[strlen(file)-2] != '.' && file[strlen(file)-1] != 'a') ||
+            else if ((file[strlen(file)-2] != '.' && file[strlen(file)-1] != 'a') &&
                      (file[strlen(file)-3] != '.' && file[strlen(file)-2] != 's' &&
                       file[strlen(file)-1] != 'o'))
             {
