@@ -3,6 +3,7 @@
 
 int main(int argc, char **argv)
 {
+    // Opens the converted file and throws an error if it can't
     int stream = open("converted", O_RDONLY);
     if (stream < 0)
     {
@@ -15,16 +16,20 @@ int main(int argc, char **argv)
     Dllist ip_list = new_dllist();
     JRB tmp;
     JRB nil;
+    // Reads the contents of the file into buffer
     int size = (int) lseek(stream, 0, SEEK_END);
     lseek(stream, 0, SEEK_SET);
     char buffer[size];
     read(stream, buffer, size);
+    // Indexing variable
     int read_idx = 0;
     while (read_idx != size)
     {
         ip = new_ip();
+        // Creates a new IP struct from the file's contents
         read_bin_data_buf(ip, buffer, &read_idx);
         nil = jrb_nil(ip->names);
+        // Creates a JRB node for each name for the current IP
         jrb_traverse(tmp, ip->names)
         {
             if (tmp == nil)
@@ -39,9 +44,12 @@ int main(int argc, char **argv)
             }
             jrb_insert_str(ip_tree, name, new_jval_v((void*)ip));
         }
+        // Appends the IP stuct to the Dllist to make it easier to free
         dll_append(ip_list, new_jval_v((void*)ip));
     }
+    // Closes the file
     close(stream);
+    // Gets the user input and prints out the corresponding data
     printf("Hosts all read in\n\n");
     char input[MAX_NAME_LENGTH];
     input[0] = 0;
@@ -50,11 +58,14 @@ int main(int argc, char **argv)
     while (!feof(stdin))
     {
         scanf("%s", input);
+        // Prints an error if it occured
         if (ferror(stdin))
         {
             fprintf(stderr, "Error: could not successfully read user input\n");
         }
+        // Searches for the user input
         searchNode = jrb_find_str(ip_tree, input);
+        // If the input can't be found, prints out a corresonding message.
         if (searchNode == NULL)
         {
             printf("no key %s\n", input);
@@ -62,6 +73,7 @@ int main(int argc, char **argv)
         }
         else
         {
+            // Adds the first IP object to a new JRB for alphabetizing
             ip = (IP*) searchNode->val.v;
             if (ip->num_names == 1)
             {
@@ -71,6 +83,7 @@ int main(int argc, char **argv)
             {
                 jrb_insert_str(alphabetizer, jrb_next(jrb_first(ip->names))->key.s, new_jval_v((void*)ip));
             }
+            // Adds all other IP objects that have the user input as a name to the JRB
             while (1)
             {
                 searchNode = jrb_prev(searchNode);
@@ -89,6 +102,7 @@ int main(int argc, char **argv)
                 }
             }
         }
+        // Prints the JRB's contents
         nil = jrb_nil(alphabetizer);
         jrb_traverse(tmp, alphabetizer)
         {
@@ -100,10 +114,12 @@ int main(int argc, char **argv)
             print_data(ip, stdout);
             printf("\n");
         }
+        // Clears the printing JRB
         jrb_free_tree(alphabetizer);
         alphabetizer = make_jrb();
         printf("Enter host name: ");
     }
+    // Frees memory
     jrb_free_tree(alphabetizer);
     Dllist dtmp;
     Dllist dnil = dll_nil(ip_list);
