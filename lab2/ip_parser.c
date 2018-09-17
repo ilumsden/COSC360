@@ -173,9 +173,8 @@ void read_bin_data_sys(IP *ip, int stream)
 
 void read_bin_data_buf(IP *ip, char *buf, int *current_loc)
 {
-    memcpy(ip->address_nums, buf+*current_loc, 4);
+    memcpy(ip->address_nums, buf+(*current_loc), 4);
     (*current_loc) += 4;
-    printf("current_loc is %d\n", *current_loc);
     gen_address(ip);
     unsigned int numNames = 0;
     unsigned char ch = 0;
@@ -183,7 +182,6 @@ void read_bin_data_buf(IP *ip, char *buf, int *current_loc)
     {
         ch = buf[*current_loc];
         (*current_loc)++;
-        printf("current_loc is %d\n", *current_loc);
         numNames = intcat(numNames, (unsigned int) ch);
     }
     char *name;
@@ -209,7 +207,6 @@ void read_bin_data_buf(IP *ip, char *buf, int *current_loc)
             //c = buf[*current_loc];
             memcpy(&c, buf+(*current_loc), 1);
             (*current_loc)++;
-            printf("current_loc is %d\n", *current_loc);
             name[idx] = c;
             if (c == '.' && !absolute)
             {
