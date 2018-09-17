@@ -180,7 +180,7 @@ void read_bin_data_buf(IP *ip, char *buf, int *current_loc)
     unsigned char ch = 0;
     for (int i = 0; i < 4; i++)
     {
-        ch = buf[*current_loc];
+        memcpy(&ch, buf+(*current_loc), 1);
         (*current_loc)++;
         numNames = intcat(numNames, (unsigned int) ch);
     }

@@ -22,7 +22,6 @@ int main(int argc, char **argv)
     {
         ip = new_ip();
         read_bin_data_buf(ip, buffer, &read_idx);
-        printf("read_idx is %d\n", read_idx);
         nil = jrb_nil(ip->names);
         jrb_traverse(tmp, ip->names)
         {
