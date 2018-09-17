@@ -11,6 +11,7 @@ IP* new_ip()
 {
     IP* ip = (IP*) memChk(malloc(sizeof(IP)));
     ip->names = make_jrb();
+    ip->num_names = 0;
     for (int i = 0; i < 4; i++)
     {
         ip->address_nums[i] = '\0';
@@ -78,6 +79,7 @@ void read_bin_data_fpointer(IP *ip, FILE *stream)
             ++idx;
         }
         jrb_insert_str(ip->names, name, new_jval_v(NULL));
+        ip->num_names++;
         if (absolute)
         {
             if (locallen == 0)
@@ -90,6 +92,7 @@ void read_bin_data_fpointer(IP *ip, FILE *stream)
             strncpy(local, name, locallen-1);
             local[locallen-1] = 0;
             jrb_insert_str(ip->names, local, new_jval_v(NULL));
+            ip->num_names++;
         }
     }
     epoint:

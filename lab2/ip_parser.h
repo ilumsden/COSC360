@@ -31,6 +31,7 @@ typedef struct ip_data
 {
     unsigned char address_nums[4];
     char *address;
+    int num_names;
     JRB names;
 } IP;
 
