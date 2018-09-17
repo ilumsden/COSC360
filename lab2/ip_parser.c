@@ -174,7 +174,7 @@ void read_bin_data_sys(IP *ip, int stream)
 void read_bin_data_buf(IP *ip, char *buf, int *current_loc)
 {
     memcpy(ip->address_nums, buf+*current_loc, 4);
-    *current_loc += 4;
+    (*current_loc) += 4;
     gen_address(ip);
     unsigned int numNames = 0;
     unsigned char ch = 0;
@@ -204,7 +204,8 @@ void read_bin_data_buf(IP *ip, char *buf, int *current_loc)
                 printf("Could not read full name. Extracted name is %s\n", name);
                 break;
             }
-            c = buf[*current_loc];
+            //c = buf[*current_loc];
+            memcpy(&c, buf+(*current_loc), 1);
             (*current_loc)++;
             name[idx] = c;
             if (c == '.' && !absolute)
