@@ -42,6 +42,8 @@ extern void read_bin_data_fpointer(IP* ip, FILE *stream);
 
 extern void read_bin_data_sys(IP* ip, int stream);
 
+extern void read_bin_data_buf(IP* ip, char *buf);
+
 extern void print_data(IP *ip, FILE *stream);
 
 extern void free_ip(IP *ip);
