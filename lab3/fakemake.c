@@ -8,6 +8,15 @@ int main(int argc, char **argv)
         fprintf(stderr, "No target. Stopping.\n");
         return -1;
     }
+    else if (strcmp(argv[1], "clean") == 0)
+    {
+        if ( system("rm *.o") < 0 )
+        {
+            fprintf(stderr, "Could not delete .o files.\n");
+            return -1;
+        }
+        return 0;
+    }
     IS is = new_inputstruct(argv[1]);
     Compile *compilation = new_compilation();
     while (get_line(is) >= 0)
