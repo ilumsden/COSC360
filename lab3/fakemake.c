@@ -54,6 +54,7 @@ int main(int argc, char **argv)
     char **commands = get_commands(compilation);
     for (int i = 0; i < compilation->num_commands; i++)
     {
+        printf("%s\n", commands[i]);
         if ( system(commands[i]) < 0 )
         {
             fprintf(stderr, "Compilation failed\n");
