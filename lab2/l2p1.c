@@ -57,10 +57,10 @@ int main(int argc, char **argv)
         else
         {
             ip = (IP*) searchNode->val.v;
+            jrb_insert_str(alphabetizer, jrb_first(ip->names)->key.s, new_jval_v((void*)ip));
             while (1)
             {
                 searchNode = jrb_prev(searchNode);
-                jrb_insert_str(alphabetizer, jrb_first(ip->names)->key.s, new_jval_v((void*)ip));
                 if (strcmp(searchNode->key.s, input) != 0)
                 {
                     break;
