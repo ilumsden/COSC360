@@ -167,8 +167,9 @@ void add_libraries(Compile *compilation, char **fields, int NF)
                 fprintf(stderr, "Error: %s does not exist.\n", file);
                 exit(-1);
             }
-            else if (strcmp(&file[strlen(file)-2], ".a") != 0 
-                     || strcmp(&file[strlen(file)-3], ".so") != 0)
+            else if ((file[strlen(file)-2] != '.' && file[strlen(file)-1] != 'a') ||
+                     (file[strlen(file)-3] != '.' && file[strlen(file)-2] != 's' &&
+                      file[strlen(file)-1] != 'o'))
             {
                 fprintf(stderr, "Warning: Non-library included on a library line. Skipping.\n");
             }
