@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 project(CS360Lab2)
 enable_language(C)
 
-option(PERSONAL "Builds lab 1 for a non-Hydra computer." OFF)
+option(PERSONAL "Builds lab 2 for a non-Hydra computer." OFF)
 
 option(ALL "Builds all" ON)
 option(PART1 "Builds l2p1" OFF)
