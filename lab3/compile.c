@@ -220,13 +220,13 @@ char** get_commands(Compile *compilation)
         {
             if ( stat(compilation->srcs[i], buf) < 0 )
             {
-                fprintf("Error: could not stat %s\n", compilation->srcs[i]);
+                fprintf(stderr, "Error: could not stat %s\n", compilation->srcs[i]);
                 exit(-1);
             }
             int src_time = (int) buf.st_mtime;
             if ( stat(obj_name, buf) < 0 )
             {
-                fprintf("Error: could not stat %s\n", obj_name);
+                fprintf(stderr, "Error: could not stat %s\n", obj_name);
                 exit(-1);
             }
             int obj_time = (int) buf.st_mtime;

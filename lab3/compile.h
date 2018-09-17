@@ -1,13 +1,17 @@
 #ifndef COMPILE_H
 #define COMPILE_H
 
+#define _POSIX_C_SOURCE 200809L
+
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "fields.h"
+#include <unistd.h>
 
 #define MAX_ARGS 64
 #define MAX_EXEC_NAME 512
+#define MAX_COMPILE_COMMAND_SIZE 2048
 
 typedef struct compile_t
 {
@@ -20,6 +24,7 @@ typedef struct compile_t
     int    num_flags;
     char **libraries;
     int    num_libs;
+    int    num_commands;
 } Compile;
 
 extern Compile* new_compilation();
