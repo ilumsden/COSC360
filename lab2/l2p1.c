@@ -65,7 +65,7 @@ int main(int argc, char **argv)
                     break;
                 }
                 ip = (IP*) searchNode->val.v;
-                jrb_insert_str(alphabetizer, jrb_first(ip->names)->flink->key.s, new_jval_v((void*)ip));
+                jrb_insert_str(alphabetizer, jrb_first(ip->names)->key.s, new_jval_v((void*)ip));
             }
         }
         nil = jrb_nil(alphabetizer);
