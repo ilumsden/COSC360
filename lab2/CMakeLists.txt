@@ -33,8 +33,8 @@ file(GLOB lab2_headers "${PROJECT_SOURCE_DIR}/*.h")
 
 list(REMOVE_ITEM lab2_src "${PROJECT_SOURCE_DIR}/l2p1.c")
 message(STATUS "list is ${lab2_src}")
-#list(REMOVE_ITEM lab2_src "${PROJECT_SOURCE_DIR}/l2p2.c")
-#list(REMOVE_ITEM lab2_src "${PROJECT_SOURCE_DIR}/l2p3.c")
+list(REMOVE_ITEM lab2_src "${PROJECT_SOURCE_DIR}/l2p2.c")
+list(REMOVE_ITEM lab2_src "${PROJECT_SOURCE_DIR}/l2p3.c")
 
 add_library(l2 STATIC ${lab2_src} ${lab2_headers})
 
