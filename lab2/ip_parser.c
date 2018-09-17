@@ -171,17 +171,17 @@ void read_bin_data_sys(IP *ip, int stream)
         return;
 }
 
-void read_bin_data_buf(IP *ip, char *buf)
+void read_bin_data_buf(IP *ip, char *buf, int *current_loc)
 {
-    memcpy(ip->address_nums, buf, 4);
-    buf += 4;
+    memcpy(ip->address_nums, buf+*current_loc, 4);
+    *current_loc += 4;
     gen_address(ip);
     unsigned int numNames = 0;
     unsigned char ch = 0;
     for (int i = 0; i < 4; i++)
     {
-        ch = *buf;
-        ++buf;
+        ch = buf[*current_loc];
+        (*current_loc)++;
         numNames = intcat(numNames, (unsigned int) ch);
     }
     char *name;
@@ -204,8 +204,8 @@ void read_bin_data_buf(IP *ip, char *buf)
                 printf("Could not read full name. Extracted name is %s\n", name);
                 break;
             }
-            c = *buf;
-            ++buf;
+            c = buf[*current_loc];
+            (*current_loc)++;
             name[idx] = c;
             if (c == '.' && !absolute)
             {

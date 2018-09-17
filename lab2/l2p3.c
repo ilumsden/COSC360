@@ -17,12 +17,12 @@ int main(int argc, char **argv)
     JRB nil;
     char buffer[350000];
     read(stream, buffer, 350000);
-    char *buf_init = buffer;
     int read_idx = 0;
+    char *buf_init = buffer;
     while (read_idx != 350000)
     {
         ip = new_ip();
-        read_bin_data_buf(ip, buffer);
+        read_bin_data_buf(ip, buffer, &read_idx);
         nil = jrb_nil(ip->names);
         jrb_traverse(tmp, ip->names)
         {
@@ -39,7 +39,6 @@ int main(int argc, char **argv)
             jrb_insert_str(ip_tree, name, new_jval_v((void*)ip));
         }
         dll_append(ip_list, new_jval_v((void*)ip));
-        read_idx++;
     }
     close(stream);
     printf("Hosts all read in\n\n");
