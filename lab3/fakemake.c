@@ -34,7 +34,7 @@ int main(int argc, char **argv)
         }
         else if (strcmp(is->fields[0], "L") == 0)
         {
-            add_libraries(compilation, is-fields, is->NF);
+            add_libraries(compilation, is->fields, is->NF);
         }
         else
         {
