@@ -98,7 +98,7 @@ void read_bin_data_fpointer(IP *ip, FILE *stream)
 
 void read_bin_data_sys(IP *ip, int stream)
 {
-    if ( read(stream, ip->address_nums, 4*sizeof(unsigned char)) == -1 )
+    if ( read(stream, ip->address_nums, 4) == -1 )
     {
         fprintf(stderr, "Warning: EOF reached during read of address.\n");
         return;
