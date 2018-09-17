@@ -18,7 +18,8 @@ int main(int argc, char **argv)
     char buffer[350000];
     read(stream, buffer, 350000);
     char *buf_init = buffer;
-    while (buffer != (buf_init + 350000))
+    int read_idx = 0;
+    while (read_idx != 350000)
     {
         ip = new_ip();
         read_bin_data_buf(ip, buffer);
@@ -38,6 +39,7 @@ int main(int argc, char **argv)
             jrb_insert_str(ip_tree, name, new_jval_v((void*)ip));
         }
         dll_append(ip_list, new_jval_v((void*)ip));
+        read_idx++;
     }
     close(stream);
     printf("Hosts all read in\n\n");
