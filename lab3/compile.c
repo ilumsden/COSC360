@@ -252,6 +252,11 @@ char** get_commands(Compile *compilation)
         free(obj_name);
     }
     free(header_times);
+    if (num_objs == 0)
+    {
+        printf("%s up to date\n", compilation->exec_name);
+        exit(0);
+    }
     char **compile_lines = (char**) malloc((num_objs+1) * sizeof(char*));
     compilation->num_commands = num_objs+1;
     for (int i = 0; i < num_objs+1; i++)

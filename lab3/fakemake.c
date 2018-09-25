@@ -8,7 +8,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "No target. Stopping.\n");
         return -1;
     }
-    else if (strcmp(argv[1], "clean") == 0)
+    /*else if (strcmp(argv[1], "clean") == 0)
     {
         if ( system("rm *.o") < 0 )
         {
@@ -16,7 +16,7 @@ int main(int argc, char **argv)
             return -1;
         }
         return 0;
-    }
+    }*/
     IS is = new_inputstruct(argv[1]);
     Compile *compilation = new_compilation();
     while (get_line(is) >= 0)
@@ -61,6 +61,16 @@ int main(int argc, char **argv)
             return -1;
         }
     }
+    char *runner = (char*) malloc(50);
+    runner[0] = 0;
+    strcpy(runner, "./");
+    strcat(runner, compilation->exec_name);
+    if ( system(runner) < 0 )
+    {
+        fprintf(stderr, "Could not run\n");
+        return -1;
+    }
+    free(runner);
     for (int i = 0; i < compilation->num_commands; i++)
     {
         free(commands[i]);
@@ -68,4 +78,5 @@ int main(int argc, char **argv)
     free(commands);
     free_compilation(compilation);
     jettison_inputstruct(is);
+    return 0;
 }
