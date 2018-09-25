@@ -61,4 +61,11 @@ int main(int argc, char **argv)
             return -1;
         }
     }
+    for (int i = 0; i < compilation->num_commands; i++)
+    {
+        free(commands[i]);
+    }
+    free(commands);
+    free_compilation(compilation);
+    jettison_inputstruct(is);
 }
