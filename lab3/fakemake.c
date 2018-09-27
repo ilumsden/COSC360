@@ -79,6 +79,13 @@ int main(int argc, char **argv)
         if ( access(fname, F_OK) != 0 )
         {
             fprintf(stderr, "fmakefile: %s: No such file or directory\n", fname);
+            free(fname);
+            for (int i = 0; i < compilation->num_commands; i++)
+            {
+                free(commands[i]);
+            }
+            free(commands);
+            free_compilation(compilation);
             return -1;
         }
         free(fname);
@@ -86,6 +93,12 @@ int main(int argc, char **argv)
         if ( system(commands[i]) != 0 )
         {
             fprintf(stderr, "Command failed.  Exiting\n");
+            for (int i = 0; i < compilation->num_commands; i++)
+            {
+                free(commands[i]);
+            }
+            free(commands);
+            free_compilation(compilation);
             return -1;
         }
     }
