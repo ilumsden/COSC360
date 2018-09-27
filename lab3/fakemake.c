@@ -1,23 +1,37 @@
 #include "compile.h"
 #include "fields.h"
 
+char* recover_fname_from_command(char *command)
+{
+    int fnamelen = 0;
+    int startidx = -1;
+    for (int i = strlen(command)-1; i >= 0; i--)
+    {
+        if (command[i] == ' ')
+        {
+            startidx = i+1;
+            fnamelen = strlen(command) - startidx;
+            break;
+        }
+    }
+    if (startidx == -1)
+    {
+        return command;
+    }
+    char *fname = (char*) malloc(fnamelen+1);
+    strcpy(fname, &command[startidx]);
+    return fname;
+}
+
 int main(int argc, char **argv)
 {
-    if (argc == 1)
+    char target[50] = "fmakefile";
+    //printf("target is %s\n", target);
+    if (argc == 2)
     {
-        fprintf(stderr, "No target. Stopping.\n");
-        return -1;
+        strcpy(target, argv[1]);
     }
-    /*else if (strcmp(argv[1], "clean") == 0)
-    {
-        if ( system("rm *.o") < 0 )
-        {
-            fprintf(stderr, "Could not delete .o files.\n");
-            return -1;
-        }
-        return 0;
-    }*/
-    IS is = new_inputstruct(argv[1]);
+    IS is = new_inputstruct(target);
     Compile *compilation = new_compilation();
     while (get_line(is) >= 0)
     {
@@ -27,7 +41,7 @@ int main(int argc, char **argv)
         }
         else if (strcmp(is->fields[0], "E") == 0)
         {
-            add_exec(compilation, is->fields, is->NF);
+            add_exec(compilation, is->fields, is->NF, is->line);
         }
         else if (strcmp(is->fields[0], "C") == 0)
         {
@@ -51,32 +65,41 @@ int main(int argc, char **argv)
             return -1;
         }
     }
-    char **commands = get_commands(compilation);
-    for (int i = 0; i < compilation->num_commands; i++)
+    jettison_inputstruct(is);
+    if (compilation->exec_name == NULL || strcmp(compilation->exec_name, "") == 0)
     {
-        printf("%s\n", commands[i]);
-        if ( system(commands[i]) < 0 )
+        fprintf(stderr, "No executable specified\n");
+        free_compilation(compilation);
+        return -1;
+    }
+    char **commands = get_commands(compilation);
+    for (int i = 0; i < compilation->num_commands-1; i++)
+    {
+        char *fname = recover_fname_from_command(commands[i]);
+        if ( access(fname, F_OK) != 0 )
         {
-            fprintf(stderr, "Compilation failed\n");
+            fprintf(stderr, "fmakefile: %s: No such file or directory\n", fname);
+            return -1;
+        }
+        free(fname);
+        printf("%s\n", commands[i]);
+        if ( system(commands[i]) != 0 )
+        {
+            fprintf(stderr, "Command failed.  Exiting\n");
             return -1;
         }
     }
-    char *runner = (char*) malloc(50);
-    runner[0] = 0;
-    strcpy(runner, "./");
-    strcat(runner, compilation->exec_name);
-    if ( system(runner) < 0 )
+    printf("%s\n", commands[compilation->num_commands-1]);
+    if ( system(commands[compilation->num_commands-1]) != 0 )
     {
-        fprintf(stderr, "Could not run\n");
+        fprintf(stderr, "Command failed.  Fakemake exiting\n");
         return -1;
     }
-    free(runner);
     for (int i = 0; i < compilation->num_commands; i++)
     {
         free(commands[i]);
     }
     free(commands);
     free_compilation(compilation);
-    jettison_inputstruct(is);
     return 0;
 }

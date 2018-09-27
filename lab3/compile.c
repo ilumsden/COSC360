@@ -32,12 +32,7 @@ void add_srcs(Compile *compilation, char **fields, int NF)
         for (int i = 1; i < NF; i++)
         {
             char *file = fields[i];
-            if (access(file, F_OK) < 0)
-            {
-                fprintf(stderr, "Error: %s does not exist.\n", file);
-                exit(-1);
-            }
-            else if (file[strlen(file)-2] != '.' && file[strlen(file)-1] != 'c')
+            if (file[strlen(file)-2] != '.' && file[strlen(file)-1] != 'c')
             {
                 fprintf(stderr, "Warning: Non-source file included on a sources line. Skipping.\n");
             }
@@ -55,11 +50,11 @@ void add_srcs(Compile *compilation, char **fields, int NF)
     }
 }
 
-void add_exec(Compile *compilation, char **fields, int NF)
+void add_exec(Compile *compilation, char **fields, int NF, int linenum)
 {
     if (strcmp(compilation->exec_name, "") != 0)
     {
-        fprintf(stderr, "Error: multiple executable names in the description file.\n");
+        fprintf(stderr, "fmakefile (%d) cannot have more than one E line\n", linenum);
         exit(-1);
     }
     else if (NF == 0)
@@ -91,12 +86,7 @@ void add_headers(Compile *compilation, char **fields, int NF)
         for (int i = 1; i < NF; i++)
         {
             char *file = fields[i];
-            if (access(file, F_OK) < 0)
-            {
-                fprintf(stderr, "Error: %s does not exist.\n", file);
-                exit(-1);
-            }
-            else if (file[strlen(file)-2] != '.' && file[strlen(file)-1] != 'h')
+            if (file[strlen(file)-2] != '.' && file[strlen(file)-1] != 'h')
             {
                 fprintf(stderr, "Warning: Non-header file included on a header line. Skipping.\n");
             }
@@ -162,7 +152,17 @@ void add_libraries(Compile *compilation, char **fields, int NF)
         for (int i = 1; i < NF; i++)
         {
             char *file = fields[i];
-            if (access(file, F_OK) < 0)
+            if (file[0] == '-' && (file[1] == 'l' || file[1] == 'L'))
+            {
+                compilation->libraries[compilation->num_libs] = strdup(file);
+                compilation->num_libs++;
+                if (compilation->num_libs == MAX_ARGS)
+                {
+                    fprintf(stderr, "Warning: Maximum number of libraries reached (%d)\n", MAX_ARGS);
+                    break;
+                }
+            }
+            else if (access(file, F_OK) < 0)
             {
                 fprintf(stderr, "Error: %s does not exist.\n", file);
                 exit(-1);
@@ -203,13 +203,15 @@ char** get_commands(Compile *compilation)
         }
         header_times[i] = (int) buf.st_mtime;
     }
+    int *obj_times = (int*) malloc(compilation->num_srcs*sizeof(int));
     for (int i = 0; i < compilation->num_srcs; i++)
     {
         recompile[i] = false;
         struct stat buf;
-        char* obj_name = (char*) malloc(strlen(compilation->srcs[i]));
+        char* obj_name = (char*) malloc(strlen(compilation->srcs[i])+1);
         obj_name[0] = 0;
-        strncpy(obj_name, compilation->srcs[i], strlen(compilation->srcs[i])-1);
+        //strncpy(obj_name, compilation->srcs[i], strlen(compilation->srcs[i])-1);
+        strcpy(obj_name, compilation->srcs[i]);
         obj_name[strlen(compilation->srcs[i])-1] = 'o';
         objs[i] = strdup(obj_name);
         if (access(obj_name, F_OK) < 0)
@@ -230,8 +232,8 @@ char** get_commands(Compile *compilation)
                 fprintf(stderr, "Error: could not stat %s\n", obj_name);
                 exit(-1);
             }
-            int obj_time = (int) buf.st_mtime;
-            if (src_time > obj_time)
+            obj_times[i] = (int) buf.st_mtime;
+            if (src_time > obj_times[i])
             {
                 recompile[i] = true;
                 num_objs++;
@@ -240,7 +242,7 @@ char** get_commands(Compile *compilation)
             {
                 for (int j = 0; j < compilation->num_headers; j++)
                 {
-                    if (header_times[j] > obj_time)
+                    if (header_times[j] > obj_times[i])
                     {
                         recompile[i] = true;
                         num_objs++;
@@ -252,10 +254,37 @@ char** get_commands(Compile *compilation)
         free(obj_name);
     }
     free(header_times);
-    if (num_objs == 0)
+    if (num_objs == 0 && access(compilation->exec_name, F_OK) == 0)
     {
-        printf("%s up to date\n", compilation->exec_name);
-        exit(0);
+        struct stat buf;
+        if ( stat(compilation->exec_name, &buf) < 0 )
+        {
+            fprintf(stderr, "Error: could not stat %s\n", compilation->exec_name);
+            exit(-1);
+        }
+        int exec_time = (int) buf.st_mtime;
+        bool up_to_date = true;
+        for (int i = 0; i < compilation->num_srcs; i++)
+        {
+            if (obj_times[i] > exec_time)
+            {
+                up_to_date = false;
+                break;
+            }
+        }
+        if (up_to_date)
+        {
+            printf("%s up to date\n", compilation->exec_name);
+            free(recompile);
+            for (int i = 0; i < compilation->num_srcs; i++)
+            {
+                free(objs[i]);
+            }
+            free(objs);
+            free(obj_times);
+            free_compilation(compilation);
+            exit(1);
+        }
     }
     char **compile_lines = (char**) malloc((num_objs+1) * sizeof(char*));
     compilation->num_commands = num_objs+1;
@@ -295,16 +324,16 @@ char** get_commands(Compile *compilation)
     }
     for (int i = 0; i < compilation->num_srcs; i++)
     {
-        if (recompile[i])
+        strcat(compile_lines[idx], objs[i]);
+        if (i != compilation->num_srcs - 1)
         {
-            strcat(compile_lines[idx], objs[i]);
             strcat(compile_lines[idx], " ");
         }
     }
     for (int i = 0; i < compilation->num_libs; i++)
     {
-        strcat(compile_lines[idx], compilation->libraries[i]);
         strcat(compile_lines[idx], " ");
+        strcat(compile_lines[idx], compilation->libraries[i]);
     }
     free(recompile);
     for (int i = 0; i < compilation->num_srcs; i++)
@@ -312,6 +341,7 @@ char** get_commands(Compile *compilation)
         free(objs[i]);
     }
     free(objs);
+    free(obj_times);
     return compile_lines;
 }
 

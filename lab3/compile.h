@@ -32,7 +32,7 @@ extern Compile* new_compilation();
 
 extern void add_srcs(Compile *compilation, char **fields, int NF);
 
-extern void add_exec(Compile *compilation, char **fields, int NF);
+extern void add_exec(Compile *compilation, char **fields, int NF, int linenum);
 
 extern void add_headers(Compile *compilation, char **fields, int NF);
 
