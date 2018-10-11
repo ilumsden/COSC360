@@ -59,9 +59,9 @@ void remove_substring(char *s, const char *sub)
     }
 }
 
-void set_checksum(TarHeader *thead)
+int64_t calc_checksum(TarHeader *thead)
 {
-    int sum = 0;
+    int64_t sum = 0;
     for (int i = 0; i < 100; i++)
     {
         sum += 0xFF & thead->tar_name[i];
@@ -69,7 +69,7 @@ void set_checksum(TarHeader *thead)
     sum += (int64_t) thead->mode;
     sum += thead->num_bytes;
     sum += thead->mod_time;
-    thead->checksum = sum;
+    return sum;
 }
 
 FileInfo* create_header(char *fname)
@@ -105,7 +105,7 @@ FileInfo* create_header(char *fname)
     thead->mode = fstat->st_mode;
     thead->num_bytes = (uint64_t) fstat->st_size;
     thead->mod_time = (uint64_t) fstat->st_mtime;
-    set_checksum(thead);
+    thead->checksum = set_checksum(thead);
     finfo->header_for_tar = thead;
     return finfo;
 }
@@ -113,6 +113,34 @@ FileInfo* create_header(char *fname)
 TarHeader* parse_header(char *head)
 {
     TarHeader *thead = (TarHeader*) malloc(sizeof(TarHeader));
-    memcpy(thead->tar_name, head, 100);
-    memcpy(thead->ftype, )
+    memcpy(thead->tar_name, &head[0], 100);
+    memcpy(thead->ftype, &head[100], 1);
+    memcpy(thead->mode, &head[101], 4);
+    memcpy(thead->num_bytes, &head[105], 8);
+    memcpy(thead->mod_time, &head[113], 8);
+    memcpy(thead->checksum, &head[121], 8);
+    int64_t calc_sum = calc_checksum(thead);
+    if (thead->checksum != calc_sum)
+    {
+        fprintf(stderr, "Error: Tarfile corrupted! Checksums don't match.\n");
+        exit(-1);
+    }
+    return thead;
+}
+
+void free_fileinfo(FileInfo *finfo)
+{
+    free(finfo->header_for_tar);
+    free(finfo->file_stats);
+    free(finfo);
+}
+
+bool header_eq(TarHeader *h1, TarHeader *h2)
+{
+    if (strcmp(h1->tar_name, h2->tar_name) != 0)
+    {
+        return false;
+    }
+    return (h1->ftype == h2->ftype) && (h1->mode == h2->mode) && 
+           (h1->num_bytes == h2->num_bytes) && (h1->mod_time == h2->mod_time);
 }

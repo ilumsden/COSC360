@@ -23,9 +23,9 @@ struct header_t
     uint64_t num_bytes; // offset = 105
     uint64_t mod_time; // offset = 113
     int64_t checksum; // offset 121
-} TarHeader;
+} TarHeader; // Size is 129 bytes
 
-void set_checksum(TarHeader* thead);
+int64_t calc_checksum(TarHeader* thead);
 
 struct file_tarinfo_t
 {
@@ -39,7 +39,5 @@ extern FileInfo* create_header(char *fname);
 extern TarHeader* parse_header(char *head);
 
 extern void free_fileinfo(FileInfo *finfo);
-
-extern void free_tarheader(TarHeader *thead);
 
 extern bool header_eq(TarHeader *h1, TarHeader *h2);
