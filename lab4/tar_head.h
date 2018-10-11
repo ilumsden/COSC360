@@ -15,7 +15,7 @@ void remove_substring(char *s, const char *sub);
 #define JTARSYMLINK 1
 #define JTARDIR 2
 
-struct header_t
+typedef struct header_t
 {
     char tar_name[100]; // offset = 0
     uint8_t ftype; // offset = 100
@@ -27,7 +27,7 @@ struct header_t
 
 int64_t calc_checksum(TarHeader* thead);
 
-struct file_tarinfo_t
+typedef struct file_tarinfo_t
 {
     char real_name[100];
     TarHeader *header_for_tar;

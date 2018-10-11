@@ -1,7 +1,7 @@
 #include "tar_head.h"
 #include "dllist.h"
 
-struct tar_t
+typedef struct tar_t
 {
     int num_files;
     char *file_separator;
@@ -9,4 +9,4 @@ struct tar_t
     Dllist headers;
 } Tarer;
 
-
+export Tarer* create_tarer();
