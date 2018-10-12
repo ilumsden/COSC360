@@ -66,9 +66,21 @@ int64_t calc_checksum(TarHeader *thead)
     {
         sum += 0xFF & thead->tar_name[i];
     }
-    sum += (int64_t) thead->mode;
-    sum += thead->num_bytes;
-    sum += thead->mod_time;
+    sum += thead->ftype;
+    sum += (int) thead->file_stats.st_dev;
+    sum += (int) thead->file_stats.st_ino;
+    sum += (int) thead->file_stats.st_mode;
+    sum += (int) thead->file_stats.st_nlink;
+    sum += (int) thead->file_stats.st_uid;
+    sum += (int) thead->file_stats.st_gid;
+    sum += (int) thead->file_stats.st_rdev;
+    sum += (int) thead->file_stats.st_size;
+    sum += (int) thead->file_stats.st_blksize;
+    sum += (int) thead->file_stats.st_blocks;
+    sum += (int) thead->file_stats.st_blocks;
+    sum += (int) thead->file_stats.st_atime;
+    sum += (int) thead->file_stats.st_mtime;
+    sum += (int) thead->file_stats.st_ctime;
     return sum;
 }
 
@@ -76,24 +88,24 @@ FileInfo* create_header(char *fname)
 {
     FileInfo *finfo = (FileInfo*) malloc(sizeof(FileInfo));
     TarHeader *thead = (TarHeader*) malloc(sizeof(TarHeader));
-    finfo->real_name = strdup(fname);
-    thead->tar_name = remove_relative_specifiers_from_path(fname);
-    struct stat *fstat;
-    if ( lstat(fname, fstat) != 0 )
+    strcpy(finfo->real_name, fname);
+    char* tmp_str = remove_relative_specifiers_from_path(fname);
+    strcpy(thead->tar_name, tmp_str);
+    free(tmp_str);
+    if ( lstat(fname, &thead->file_stats) != 0 )
     {
         fprintf(stderr, "Error: Could not stat %s\n", fname);
         exit(-1);
     }
-    finfo->file_stats = fstat;
-    if (S_ISDIR(fstat->st_mode) != 0)
+    if (S_ISDIR(thead->file_stats.st_mode) != 0)
     {
         thead->ftype = JTARDIR;
     }
-    else if (S_ISREG(fstat->st_mode) != 0)
+    else if (S_ISREG(thead->file_stats.st_mode) != 0)
     {
         thead->ftype = JTARNORMAL;
     }
-    else if (S_ISLINK(fstat->st_mode) != 0)
+    else if (S_ISLINK(thead->file_stats.st_mode) != 0)
     {
         thead->ftype = JTARSYMLINK;
     }
@@ -102,9 +114,6 @@ FileInfo* create_header(char *fname)
         fprintf(stderr, "Error: Could not determine file type of %s\n", fname);
         exit(-1);
     }
-    thead->mode = fstat->st_mode;
-    thead->num_bytes = (uint64_t) fstat->st_size;
-    thead->mod_time = (uint64_t) fstat->st_mtime;
     thead->checksum = set_checksum(thead);
     finfo->header_for_tar = thead;
     return finfo;
@@ -114,11 +123,9 @@ TarHeader* parse_header(char *head)
 {
     TarHeader *thead = (TarHeader*) malloc(sizeof(TarHeader));
     memcpy(thead->tar_name, &head[0], 100);
-    memcpy(thead->ftype, &head[100], 1);
-    memcpy(thead->mode, &head[101], 4);
-    memcpy(thead->num_bytes, &head[105], 8);
-    memcpy(thead->mod_time, &head[113], 8);
-    memcpy(thead->checksum, &head[121], 8);
+    memcpy(&thead->ftype, &head[100], 1);
+    memcpy(&thead->file_stats, &head[101], 144);
+    memcpy(&thead->checksum, &head[121], 8);
     int64_t calc_sum = calc_checksum(thead);
     if (thead->checksum != calc_sum)
     {
@@ -131,7 +138,6 @@ TarHeader* parse_header(char *head)
 void free_fileinfo(FileInfo *finfo)
 {
     free(finfo->header_for_tar);
-    free(finfo->file_stats);
     free(finfo);
 }
 
@@ -141,6 +147,11 @@ bool header_eq(TarHeader *h1, TarHeader *h2)
     {
         return false;
     }
-    return (h1->ftype == h2->ftype) && (h1->mode == h2->mode) && 
-           (h1->num_bytes == h2->num_bytes) && (h1->mod_time == h2->mod_time);
+    return (h1->ftype == h2->ftype) && (h1->file_stats.st_dev == h2->file_stats.st_dev) &&
+           (h1->file_stats.st_ino == h2->file_stats.st_ino) && (h1->file_stats.st_mode == h2->file_stats.st_mode) &&
+           (h1->file_stats.st_nlink == h2->file_stats.st_nlink) && (h1->file_stats.st_uid == h2->file_stats.st_uid) &&
+           (h1->file_stats.st_gid == h2->file_stats.st_gid) && (h1->file_stats.st_rdev == h2->file_stats.st_rdev) &&
+           (h1->file_stats.st_size == h2->file_stats.st_size) && (h1->file_stats.st_blksize == h2->file_stats.st_blksize) &&
+           (h1->file_stats.st_blocks == h2->file_stats.st_blocks) && (h1->file_stats.st_atime == h2->file_stats.st_atime) &&
+           (h1->file_stats.st_mtime == h2->file_stats.st_mtime) && (h1->file_stats.st_ctime == h2->file_stats.st_ctime);
 }

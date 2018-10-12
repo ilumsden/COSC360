@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 extern bool dir_eq(char *dir1, char *dir2);
@@ -19,11 +20,9 @@ typedef struct header_t
 {
     char tar_name[100]; // offset = 0
     uint8_t ftype; // offset = 100
-    mode_t mode; // offset = 101
-    uint64_t num_bytes; // offset = 105
-    uint64_t mod_time; // offset = 113
-    int64_t checksum; // offset 121
-} TarHeader; // Size is 129 bytes
+    struct stat file_stats; // offset = 101
+    int64_t checksum; // offset = 245
+} TarHeader; // Size is 253 bytes
 
 int64_t calc_checksum(TarHeader* thead);
 
@@ -31,7 +30,6 @@ typedef struct file_tarinfo_t
 {
     char real_name[100];
     TarHeader *header_for_tar;
-    struct stat *file_stats;
 } FileInfo;
 
 extern FileInfo* create_header(char *fname);
