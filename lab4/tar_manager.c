@@ -18,11 +18,11 @@ void add(TarManager *tar, char *fname)
         fprintf(stderr, "Error: could not stat %s\n", fname);
         exit(-1);
     }
-    if (S_ISREG(buf->st_mode))
+    if (S_ISREG(buf.st_mode))
     {
         add_file(tar, fname);
     }
-    else if (S_ISDIR(buf->st_mode))
+    else if (S_ISDIR(buf.st_mode))
     {
         add_dir(tar, fname);
     }
@@ -79,7 +79,7 @@ void add_dir(TarManager *tar, char *dirname)
             struct stat buf;
             if ( lstat(currfile->d_name, &buf) != 0 )
             {
-                fprintf("Error: could not stat %s\n", currfile->d_name);
+                fprintf(stderr, "Error: could not stat %s\n", currfile->d_name);
                 exit(-1);
             }
             if (S_ISDIR(buf.st_mode))
@@ -106,6 +106,10 @@ void print_tar(TarManager *tar, FILE *out)
     Dllist nil = dll_nil(tar->headers);
     dll_traverse(ptr, tar->headers)
     {
+        if (ptr == nil)
+        {
+            break;
+        }
         finfo = (FileInfo*) ptr->val.v;
         fwrite(finfo->header_for_tar.tar_name, 100, 1, out);
         fwrite(&(finfo->header_for_tar.ftype), sizeof(uint8_t), 1, out);
