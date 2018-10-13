@@ -96,17 +96,19 @@ FileInfo* create_header(char *fname, char *path_to_file)
         strcat(modname, "/");
         strcat(modname, fname);
         strcpy(finfo->real_name, modname);
-        char* tmp_str = remove_relative_specifiers_from_path(modname);
-        strcpy(thead->tar_name, tmp_str);
-        free(tmp_str);
+        //char* tmp_str = remove_relative_specifiers_from_path(modname);
+        //strcpy(thead->tar_name, tmp_str);
+        strcpy(thead->tar_name, modname);
+        //free(tmp_str);
         free(modname);
     }
     else
     {
         strcpy(finfo->real_name, fname);
-        char* tmp_str = remove_relative_specifiers_from_path(fname);
-        strcpy(thead->tar_name, tmp_str);
-        free(tmp_str);
+        //char* tmp_str = remove_relative_specifiers_from_path(fname);
+        //strcpy(thead->tar_name, tmp_str);
+        strcpy(thead->tar_name, fname);
+        //free(tmp_str);
     }
     if ( lstat(fname, &thead->file_stats) != 0 )
     {
