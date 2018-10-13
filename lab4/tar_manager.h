@@ -2,6 +2,7 @@
 #define TAR_MANAGER_H
 
 #include <dirent.h>
+#include <limits.h>
 
 #include "tar_head.h"
 #include "jval.h"

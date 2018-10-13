@@ -266,7 +266,7 @@ void recreate_file(TarHeader *thead, char *filedata)
         exit(-1);
     }
     char absname[PATH_MAX];
-    if ( realpath(fname, abspath) == NULL )
+    if ( realpath(fname, absname) == NULL )
     {
         fprintf(stderr, "Error: Could not obtain the absolute path.\n");
         exit(-1);
