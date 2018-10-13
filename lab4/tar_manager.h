@@ -11,19 +11,19 @@ typedef struct tar_t
     Dllist headers;
 } TarManager;
 
-export TarManager* create_tarmanager();
+extern TarManager* create_tarmanager();
 
-export void add(TarManager *tar, char *fname);
+extern void add(TarManager *tar, char *fname);
 
 void add_file(TarManager *tar, char *fname);
 
 void add_dir(TarManager *tar, char *dirname);
 
-export void print_tar(TarManager *tar, FILE *out);
+extern void print_tar(TarManager *tar, FILE *out);
 
-export void free_tarmanger(TarManager *tar);
+extern void free_tarmanger(TarManager *tar);
 
-export void read_tar(char *fname);
+extern void read_tar(char *fname);
 
 void create_dir(char *dirname);
 
