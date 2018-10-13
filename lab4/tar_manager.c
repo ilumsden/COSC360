@@ -47,11 +47,11 @@ void add_file(TarManager *tar, char *fname)
             present = true;
             break;
         }
-        else if (stat_eq(&(finfo->header_for_tar.file_stats), &(curr->header_for_tar.file_stats)) &&
-                 finfo->header_for_tar.ftype == JTARNORMAL)
+        else if (stat_eq(&(finfo->header_for_tar->file_stats), &(curr->header_for_tar->file_stats)) &&
+                 finfo->header_for_tar->ftype == JTARNORMAL)
         {
-            strcpy(curr->header_for_tar.hard_links[curr->header_for_tar.linknum], finfo->header_for_tar.tar_name);
-            curr->header_for_tar.linknum++;
+            strcpy(curr->header_for_tar->hard_links[curr->header_for_tar->linknum], finfo->header_for_tar->tar_name);
+            curr->header_for_tar->linknum++;
             present = true;
             break;
         }
@@ -111,15 +111,15 @@ void print_tar(TarManager *tar, FILE *out)
             break;
         }
         finfo = (FileInfo*) ptr->val.v;
-        fwrite(finfo->header_for_tar.tar_name, 100, 1, out);
-        fwrite(&(finfo->header_for_tar.ftype), sizeof(uint8_t), 1, out);
-        fwrite(&(finfo->header_for_tar.file_stats), sizeof(struct stat), 1, out);
-        fwrite(&(finfo->header_for_tar.checksum), sizeof(int64_t), 1, out);
-        if (finfo->header_for_tar.file_stats.st_nlink > 1)
+        fwrite(finfo->header_for_tar->tar_name, 100, 1, out);
+        fwrite(&(finfo->header_for_tar->ftype), sizeof(uint8_t), 1, out);
+        fwrite(&(finfo->header_for_tar->file_stats), sizeof(struct stat), 1, out);
+        fwrite(&(finfo->header_for_tar->checksum), sizeof(int64_t), 1, out);
+        if (finfo->header_for_tar->file_stats.st_nlink > 1)
         {
-            for (int i = 0; i < (int)(finfo->header_for_tar.file_stats.st_nlink-1); i++)
+            for (int i = 0; i < (int)(finfo->header_for_tar->file_stats.st_nlink-1); i++)
             {
-                fwrite(finfo->header_for_tar.hard_links[i], 100, 1, out);
+                fwrite(finfo->header_for_tar->hard_links[i], 100, 1, out);
             }
         }
         FILE *currfile = fopen(finfo->real_name, "r");
@@ -128,9 +128,9 @@ void print_tar(TarManager *tar, FILE *out)
             fprintf(stderr, "Error: file could not be opened\n");
             exit(-1);
         }
-        char *buf = (char*) malloc(finfo->header_for_tar.file_stats.st_size);
-        fread(buf, finfo->header_for_tar.file_stats.st_size, 1, currfile);
-        fwrite(buf, finfo->header_for_tar.file_stats.st_size, 1, out);
+        char *buf = (char*) malloc(finfo->header_for_tar->file_stats.st_size);
+        fread(buf, finfo->header_for_tar->file_stats.st_size, 1, currfile);
+        fwrite(buf, finfo->header_for_tar->file_stats.st_size, 1, out);
         fclose(currfile);
     }
 }
