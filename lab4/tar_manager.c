@@ -105,7 +105,10 @@ void add_dir(TarManager *tar, char *dirname)
             }
             else if (S_ISREG(buf.st_mode))
             {
-                add_file(tar, currfile->d_name);
+                char *absname = (char*) malloc(strlen(dirname) + strlen(currfile->d_name) + 2);
+                absname[0] = 0;
+                sprintf(absname, "%s%s", dirname, currfile->d_name);
+                add_file(tar, absname);
             }
         }
     }
