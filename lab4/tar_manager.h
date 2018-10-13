@@ -31,6 +31,6 @@ void create_dir(char *dirname);
 
 char* create_subdirs(char *fname);
 
-void recreate_file(TarManager *tar, char *filedata);
+void recreate_file(TarHeader *thead, char *filedata);
 
 #endif
