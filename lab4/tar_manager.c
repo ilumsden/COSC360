@@ -1,7 +1,9 @@
-#include <limits.h>
 #include <utime.h>
 
 #include "tar_manager.h"
+
+// Copied from linux/limits.h. Used as the max length for absolute paths.
+#define PATH_MAX 4096
 
 TarManager* create_tarmanager()
 {
