@@ -1,5 +1,7 @@
+#ifndef TAR_MANAGER_H
+#define TAR_MANAGER_H
+
 #include <dirent.h>
-#include <sys/types.h>
 
 #include "tar_head.h"
 #include "jval.h"
@@ -21,7 +23,7 @@ void add_dir(TarManager *tar, char *dirname);
 
 extern void print_tar(TarManager *tar, FILE *out);
 
-extern void free_tarmanger(TarManager *tar);
+extern void free_tarmanager(TarManager *tar);
 
 extern void read_tar(char *fname);
 
@@ -30,3 +32,5 @@ void create_dir(char *dirname);
 char* create_subdirs(char *fname);
 
 void recreate_file(TarManager *tar, char *filedata);
+
+#endif

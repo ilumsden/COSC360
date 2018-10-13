@@ -1,9 +1,15 @@
+#ifndef TAR_HEAD_H
+#define TAR_HEAD_H
+
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 extern bool dir_eq(char *dir1, char *dir2);
@@ -45,3 +51,5 @@ extern void free_tarheader(TarHeader *thead);
 extern bool header_eq(TarHeader *h1, TarHeader *h2);
 
 extern bool stat_eq(struct stat *s1, struct stat *s2);
+
+#endif
