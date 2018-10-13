@@ -2,9 +2,6 @@
 
 #include "tar_manager.h"
 
-// Copied from linux/limits.h. Used as the max length for absolute paths.
-#define PATH_MAX 4096
-
 TarManager* create_tarmanager()
 {
     TarManager *tar = (TarManager*) malloc(sizeof(TarManager));
@@ -265,8 +262,8 @@ void recreate_file(TarHeader *thead, char *filedata)
         fprintf(stderr, "Error: Could not change time data for %s\n", thead->tar_name);
         exit(-1);
     }
-    char absname[PATH_MAX];
-    if ( realpath(fname, absname) == NULL )
+    char *absname = realpath(fname, NULL);
+    if ( absname == NULL )
     {
         fprintf(stderr, "Error: Could not obtain the absolute path.\n");
         exit(-1);

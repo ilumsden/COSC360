@@ -1,10 +1,9 @@
 #ifndef TAR_HEAD_H
 #define TAR_HEAD_H
 
-#define _GNU_SOURCE
-#define _BSD_SOURCE
-//#define _POSIX_C_SOURCE 200809L
+#define _POSIX_C_SOURCE 200809L
 
+#include <features.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -24,15 +23,20 @@ void remove_substring(char *s, const char *sub);
 #define JTARSYMLINK 1
 #define JTARDIR 2
 
+// Size is 253 bytes
 typedef struct header_t
-{
-    char tar_name[100]; // offset = 0
-    uint8_t ftype; // offset = 100
-    struct stat file_stats; // offset = 101
-    int64_t checksum; // offset = 245
+{ 
+    // offset = 0
+    char tar_name[100];
+    // offset = 100
+    uint8_t ftype;
+    // offset = 101
+    struct stat file_stats;
+    // offset = 245
+    int64_t checksum;
     char **hard_links;
     int linknum;
-} TarHeader; // Size is 253 bytes
+} TarHeader;
 
 int64_t calc_checksum(TarHeader* thead);
 
