@@ -22,6 +22,8 @@ typedef struct header_t
     uint8_t ftype; // offset = 100
     struct stat file_stats; // offset = 101
     int64_t checksum; // offset = 245
+    char **hard_links;
+    int linknum;
 } TarHeader; // Size is 253 bytes
 
 int64_t calc_checksum(TarHeader* thead);
@@ -38,4 +40,8 @@ extern TarHeader* parse_header(char *head);
 
 extern void free_fileinfo(FileInfo *finfo);
 
+extern void free_tarheader(TarHeader *thead);
+
 extern bool header_eq(TarHeader *h1, TarHeader *h2);
+
+extern bool stat_eq(struct stat *s1, struct stat *s2);

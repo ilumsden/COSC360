@@ -6,18 +6,18 @@ bool dir_eq(char *dir1, char *dir2)
     {
         return true;
     }
-    struct stat *buf1, *buf2;
-    if ( lstat(dir1, buf1) != 0 )
+    struct stat buf1, buf2;
+    if ( lstat(dir1, &buf1) != 0 )
     {
         fprintf(stderr, "Error: Could not stat directory %s\n", dir1);
         exit(-1);
     }
-    if ( lstat(dir2, buf2) != 0 )
+    if ( lstat(dir2, &buf2) != 0 )
     {
         fprintf(stderr, "Error: Could not stat directory %s\n", dir2);
         exit(-1);
     }
-    return (buf1->st_dev == buf2->st_dev) && (buf1->st_ino == buf2->st_ino);
+    return (buf1.st_dev == buf2.st_dev) && (buf1.st_ino == buf2.st_ino);
 }
 
 char* remove_relative_specifiers_from_path(char *fname)
@@ -115,6 +115,22 @@ FileInfo* create_header(char *fname)
         exit(-1);
     }
     thead->checksum = set_checksum(thead);
+    if (thead->file_stats.st_nlink > 1)
+    {
+        thead->hard_links = (char**) malloc((thead->file_stats.st_nlink-1)*sizeof(char*));
+        for (int i = 0; i < (int)(thead->file_stats.st_nlink-1); i++)
+        {
+            thead->hard_links[i] = (char*) malloc(100);
+            thead->hard_links[i][0] = 0;
+        }
+    }
+    else
+    {
+        thead->hard_links = (char**) malloc(sizeof(char*));
+        thead->hard_links[0] = (char*) malloc(1);
+        thead->hard_links[0][0] = 0;
+    }
+    thead->linknum = 0;
     finfo->header_for_tar = thead;
     return finfo;
 }
@@ -125,20 +141,52 @@ TarHeader* parse_header(char *head)
     memcpy(thead->tar_name, &head[0], 100);
     memcpy(&thead->ftype, &head[100], 1);
     memcpy(&thead->file_stats, &head[101], 144);
-    memcpy(&thead->checksum, &head[121], 8);
+    memcpy(&thead->checksum, &head[245], 8);
     int64_t calc_sum = calc_checksum(thead);
     if (thead->checksum != calc_sum)
     {
         fprintf(stderr, "Error: Tarfile corrupted! Checksums don't match.\n");
         exit(-1);
     }
+    if (thead->file_stats.st_nlink > 1)
+    {
+        thead->hard_links = (char**) malloc((thead->file_stats.st_nlink-1)*sizeof(char*));
+        for (int i = 0; i < (int)(thead->file_stats.st_nlink-1); i++)
+        {
+            thead->hard_links[i] = (char*) malloc(100);
+            thead->hard_links[i][0] = 0;
+        }
+    }
+    else
+    {
+        thead->hard_links = (char**) malloc(sizeof(char*));
+        thead->hard_links[0] = (char*) malloc(1);
+        thead->hard_links[0][0] = 0;
+    }
     return thead;
 }
 
 void free_fileinfo(FileInfo *finfo)
 {
-    free(finfo->header_for_tar);
+    free_tarheader(finfo->header_for_tar);
     free(finfo);
+}
+
+void free_tarheader(TarHeader *thead)
+{
+    if (thead->file_stats.st_nlink > 1)
+    {
+        for (int i = 0; i < (int)(thead->file_stats.st_nlink-1); i++)
+        {
+            free(thead->hard_links[i]);
+        }
+    }
+    else
+    {
+        free(thead->hard_links[0]);
+    }
+    free(thead->hard_links);
+    free(thead);
 }
 
 bool header_eq(TarHeader *h1, TarHeader *h2)
@@ -147,11 +195,16 @@ bool header_eq(TarHeader *h1, TarHeader *h2)
     {
         return false;
     }
-    return (h1->ftype == h2->ftype) && (h1->file_stats.st_dev == h2->file_stats.st_dev) &&
-           (h1->file_stats.st_ino == h2->file_stats.st_ino) && (h1->file_stats.st_mode == h2->file_stats.st_mode) &&
-           (h1->file_stats.st_nlink == h2->file_stats.st_nlink) && (h1->file_stats.st_uid == h2->file_stats.st_uid) &&
-           (h1->file_stats.st_gid == h2->file_stats.st_gid) && (h1->file_stats.st_rdev == h2->file_stats.st_rdev) &&
-           (h1->file_stats.st_size == h2->file_stats.st_size) && (h1->file_stats.st_blksize == h2->file_stats.st_blksize) &&
-           (h1->file_stats.st_blocks == h2->file_stats.st_blocks) && (h1->file_stats.st_atime == h2->file_stats.st_atime) &&
-           (h1->file_stats.st_mtime == h2->file_stats.st_mtime) && (h1->file_stats.st_ctime == h2->file_stats.st_ctime);
+    return (h1->ftype == h2->ftype) && stat_eq(&(h1->file_stats), &(h2->file_stats));
+}
+
+bool stat_eq(struct stat *s1, struct stat *s2)
+{
+    return (s1->st_dev == s2->st_dev) &&
+           (s1->st_ino == s2->st_ino) && (s1->st_mode == s2->st_mode) &&
+           (s1->st_nlink == s2->st_nlink) && (s1->st_uid == s2->st_uid) &&
+           (s1->st_gid == s2->st_gid) && (s1->st_rdev == s2->st_rdev) &&
+           (s1->st_size == s2->st_size) && (s1->st_blksize == s2->st_blksize) &&
+           (s1->st_blocks == s2->st_blocks) && (s1->st_atime == s2->st_atime) &&
+           (s1->st_mtime == s2->st_mtime) && (s1->st_ctime == s2->st_ctime);
 }
