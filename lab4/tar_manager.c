@@ -198,7 +198,7 @@ void create_dir(char *dirname)
     struct stat buf;
     if ( lstat(dirname, &buf) != 0 )
     {
-        if ( mkdir(dirname, DEFFILEMODE) != 0 )
+        if ( mkdir(dirname, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0 )
         {
             fprintf(stderr, "Error: Could not create directory %s\n", dirname);
             exit(-1);
