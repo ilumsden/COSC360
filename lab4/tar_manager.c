@@ -73,6 +73,7 @@ void add_dir(TarManager *tar, char *dirname)
     DIR *currdir;
     struct dirent *currfile;
     currdir = opendir(dirname);
+    fprintf(stderr, "currdir is not NULL: %d\n", (int)(currdir != NULL));
     if (currdir != NULL)
     {
         while ((currfile = readdir(currdir)) != NULL)
