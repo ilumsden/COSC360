@@ -25,6 +25,7 @@ char* remove_relative_specifiers_from_path(char *fname)
     char *norel = strdup(fname);
     remove_substring(norel, "../");
     remove_substring(norel, "./");
+    return norel;
 }
 
 void remove_substring(char *s, const char *sub)
@@ -105,7 +106,7 @@ FileInfo* create_header(char *fname)
     {
         thead->ftype = JTARNORMAL;
     }
-    else if (S_ISLINK(thead->file_stats.st_mode) != 0)
+    else if (S_ISLNK(thead->file_stats.st_mode) != 0)
     {
         thead->ftype = JTARSYMLINK;
     }
@@ -114,7 +115,7 @@ FileInfo* create_header(char *fname)
         fprintf(stderr, "Error: Could not determine file type of %s\n", fname);
         exit(-1);
     }
-    thead->checksum = set_checksum(thead);
+    thead->checksum = calc_checksum(thead);
     if (thead->file_stats.st_nlink > 1)
     {
         thead->hard_links = (char**) malloc((thead->file_stats.st_nlink-1)*sizeof(char*));
