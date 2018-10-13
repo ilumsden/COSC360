@@ -4,7 +4,7 @@ int main(int argc, char **argv)
 {
     if (argc < 3)
     {
-        printf("Usage: ./jtar [c | x][v] file_or_dir_names\n");
+        fprintf(stderr, "Usage: ./jtar [c | x][v] file_or_dir_names\n");
         return 0;
     }
     bool vflag = (strlen(argv[1]) == 2 && argv[1][1] == 'v');

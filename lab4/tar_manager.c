@@ -68,16 +68,31 @@ void add_file(TarManager *tar, char *fname)
     }
 }
 
+// TODO: Find way to prepend path to files
 void add_dir(TarManager *tar, char *dirname)
 {
+    char *cwd = (char*) malloc(50);
+    if ( getcwd(cwd, 50) == NULL )
+    {
+        fprintf(stderr, "Error: Could not get current working directory\n");
+        exit(-1);
+    }
     DIR *currdir;
     struct dirent *currfile;
     currdir = opendir(dirname);
-    fprintf(stderr, "currdir is not NULL: %d\n", (int)(currdir != NULL));
     if (currdir != NULL)
     {
+        if ( chdir(dirname) != 0 )
+        {
+            fprintf(stderr, "Error: could not move to directory %s\n", dirname);
+            exit(-1);
+        }
         while ((currfile = readdir(currdir)) != NULL)
         {
+            if (strcmp(currfile->d_name, ".") == 0 || strcmp(currfile->d_name, "..") == 0)
+            {
+                continue;
+            }
             struct stat buf;
             if ( lstat(currfile->d_name, &buf) != 0 )
             {
@@ -97,6 +112,13 @@ void add_dir(TarManager *tar, char *dirname)
     else
     {
         fprintf(stderr, "Error: could not open directory %s\n", dirname);
+        closedir(currdir);
+        exit(-1);
+    }
+    closedir(currdir);
+    if ( chdir(cwd) != 0 )
+    {
+        fprintf(stderr, "Error: could not move to previous directory %s\n", dirname);
         exit(-1);
     }
 }
@@ -127,7 +149,7 @@ void print_tar(TarManager *tar, FILE *out)
         FILE *currfile = fopen(finfo->real_name, "r");
         if (currfile == NULL)
         {
-            fprintf(stderr, "Error: file could not be opened\n");
+            fprintf(stderr, "Error: file %s could not be opened\n", finfo->real_name);
             exit(-1);
         }
         char *buf = (char*) malloc(finfo->header_for_tar->file_stats.st_size);
