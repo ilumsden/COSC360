@@ -254,10 +254,10 @@ void recreate_file(TarHeader *thead, char *filedata)
         fprintf(stderr, "Error: Could not change modification data for %s\n", thead->tar_name);
         exit(-1);
     }
-    struct utimbuf *times;
-    times->actime = thead->file_stats.st_atime;
-    times->modtime = thead->file_stats.st_mtime;
-    if ( utime(fname, times) != 0 )
+    struct utimbuf times;
+    times.actime = thead->file_stats.st_atime;
+    times.modtime = thead->file_stats.st_mtime;
+    if ( utime(fname, &times) != 0 )
     {
         fprintf(stderr, "Error: Could not change time data for %s\n", thead->tar_name);
         exit(-1);
@@ -298,6 +298,10 @@ void free_tarmanager(TarManager *tar)
     Dllist nil = dll_nil(tar->headers);
     dll_traverse(ptr, tar->headers)
     {
+        if (ptr == nil)
+        {
+            break;
+        }
         FileInfo *finfo = (FileInfo*) ptr->val.v;
         free_fileinfo(finfo);
     }
