@@ -1,6 +1,9 @@
 #ifndef TAR_MANAGER_H
 #define TAR_MANAGER_H
 
+#define _POSIX_C_SOURCE 200809L
+#define _XOPEN_SOURCE 700
+
 #include <dirent.h>
 #include <limits.h>
 
