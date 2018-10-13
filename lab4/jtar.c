@@ -2,9 +2,9 @@
 
 int main(int argc, char **argv)
 {
-    if (argc < 3)
+    if (argc < 2)
     {
-        fprintf(stderr, "Usage: ./jtar [c | x][v] file_or_dir_names\n");
+        fprintf(stderr, "Usage: ./jtar [c | x][v] [file_or_dir_names]\n");
         return 0;
     }
     bool vflag = (strlen(argv[1]) == 2 && argv[1][1] == 'v');
@@ -20,6 +20,6 @@ int main(int argc, char **argv)
     }
     else if (strcmp(argv[1], "x") == 0 || strcmp(argv[1], "xv") == 0)
     {
-        read_tar(argv[2]);
+        read_tar(stdin);
     }
 }

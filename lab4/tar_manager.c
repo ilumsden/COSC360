@@ -21,18 +21,19 @@ void add(TarManager *tar, char *fname)
     }
     if (S_ISREG(buf.st_mode))
     {
-        add_file(tar, fname);
+        add_file(tar, fname, "");
     }
     else if (S_ISDIR(buf.st_mode))
     {
-        add_dir(tar, fname);
+        add_dir(tar, fname, "");
     }
     return;
 }
 
-void add_file(TarManager *tar, char *fname)
+void add_file(TarManager *tar, char *fname, char *appendpath)
 {
-    FileInfo *finfo = create_header(fname);
+    FileInfo *finfo;
+    finfo = create_header(fname, appendpath);
     Dllist ptr;
     Dllist nil = dll_nil(tar->headers);
     bool present = false;
@@ -69,7 +70,7 @@ void add_file(TarManager *tar, char *fname)
 }
 
 // TODO: Find way to prepend path to files
-void add_dir(TarManager *tar, char *dirname)
+void add_dir(TarManager *tar, char *dirname, char *appendpath)
 {
     char *cwd = (char*) malloc(50);
     if ( getcwd(cwd, 50) == NULL )
@@ -82,6 +83,18 @@ void add_dir(TarManager *tar, char *dirname)
     currdir = opendir(dirname);
     if (currdir != NULL)
     {
+        char *appath = (char*) malloc(strlen(appendpath) + strlen(dirname) + 2);
+        appath[0] = 0;
+        if (strcmp(appendpath, "") == 0)
+        {
+            strcpy(appath, dirname);
+        }
+        else
+        {
+            strcpy(appath, appendpath);
+            strcat(appath, "/");
+            strcat(appath, dirname);
+        }
         if ( chdir(dirname) != 0 )
         {
             fprintf(stderr, "Error: could not move to directory %s\n", dirname);
@@ -101,14 +114,11 @@ void add_dir(TarManager *tar, char *dirname)
             }
             if (S_ISDIR(buf.st_mode))
             {
-                add_dir(tar, currfile->d_name);
+                add_dir(tar, currfile->d_name, appath);
             }
             else if (S_ISREG(buf.st_mode))
             {
-                char *absname = (char*) malloc(strlen(dirname) + strlen(currfile->d_name) + 2);
-                absname[0] = 0;
-                sprintf(absname, "%s%s", dirname, currfile->d_name);
-                add_file(tar, absname);
+                add_file(tar, currfile->d_name, appath);
             }
         }
     }
@@ -162,14 +172,8 @@ void print_tar(TarManager *tar, FILE *out)
     }
 }
 
-void read_tar(char *fname)
+void read_tar(FILE *tarfile)
 {
-    FILE *tarfile = fopen(fname, "r");
-    if (tarfile == NULL)
-    {
-        fprintf(stderr, "Error: file could not be opened\n");
-        exit(-1);
-    }
     TarHeader *thead;
     char *header = (char*) malloc((100+sizeof(uint8_t)+sizeof(struct stat)+sizeof(int64_t)));
     char *fdata;

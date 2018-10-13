@@ -21,15 +21,15 @@ extern TarManager* create_tarmanager();
 
 extern void add(TarManager *tar, char *fname);
 
-void add_file(TarManager *tar, char *fname);
+void add_file(TarManager *tar, char *fname, char *appendpath);
 
-void add_dir(TarManager *tar, char *dirname);
+void add_dir(TarManager *tar, char *dirname, char *appendpath);
 
 extern void print_tar(TarManager *tar, FILE *out);
 
 extern void free_tarmanager(TarManager *tar);
 
-extern void read_tar(char *fname);
+extern void read_tar(FILE *tarfile);
 
 void create_dir(char *dirname);
 

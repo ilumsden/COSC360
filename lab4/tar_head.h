@@ -47,7 +47,7 @@ typedef struct file_tarinfo_t
     TarHeader *header_for_tar;
 } FileInfo;
 
-extern FileInfo* create_header(char *fname);
+extern FileInfo* create_header(char *fname, char *path_to_file);
 
 extern TarHeader* parse_header(char *head);
 

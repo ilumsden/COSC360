@@ -9,12 +9,12 @@ bool dir_eq(char *dir1, char *dir2)
     struct stat buf1, buf2;
     if ( lstat(dir1, &buf1) != 0 )
     {
-        fprintf(stderr, "Error: Could not stat directory %s\n", dir1);
+        fprintf(stderr, "Error (dir_eq): Could not stat directory %s\n", dir1);
         exit(-1);
     }
     if ( lstat(dir2, &buf2) != 0 )
     {
-        fprintf(stderr, "Error: Could not stat directory %s\n", dir2);
+        fprintf(stderr, "Error (dir_eq): Could not stat directory %s\n", dir2);
         exit(-1);
     }
     return (buf1.st_dev == buf2.st_dev) && (buf1.st_ino == buf2.st_ino);
@@ -85,17 +85,32 @@ int64_t calc_checksum(TarHeader *thead)
     return sum;
 }
 
-FileInfo* create_header(char *fname)
+FileInfo* create_header(char *fname, char *path_to_file)
 {
     FileInfo *finfo = (FileInfo*) malloc(sizeof(FileInfo));
     TarHeader *thead = (TarHeader*) malloc(sizeof(TarHeader));
-    strcpy(finfo->real_name, fname);
-    char* tmp_str = remove_relative_specifiers_from_path(fname);
-    strcpy(thead->tar_name, tmp_str);
-    free(tmp_str);
+    if (strcmp(path_to_file, "") != 0)
+    {
+        char *modname = (char*) malloc(strlen(path_to_file) + strlen(fname) + 2);
+        strcpy(modname, path_to_file);
+        strcat(modname, "/");
+        strcat(modname, fname);
+        strcpy(finfo->real_name, modname);
+        char* tmp_str = remove_relative_specifiers_from_path(modname);
+        strcpy(thead->tar_name, tmp_str);
+        free(tmp_str);
+        free(modname);
+    }
+    else
+    {
+        strcpy(finfo->real_name, fname);
+        char* tmp_str = remove_relative_specifiers_from_path(fname);
+        strcpy(thead->tar_name, tmp_str);
+        free(tmp_str);
+    }
     if ( lstat(fname, &thead->file_stats) != 0 )
     {
-        fprintf(stderr, "Error: Could not stat %s\n", fname);
+        fprintf(stderr, "Error (create_header): Could not stat %s\n", fname);
         exit(-1);
     }
     if (S_ISDIR(thead->file_stats.st_mode) != 0)
