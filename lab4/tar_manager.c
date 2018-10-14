@@ -114,6 +114,7 @@ void add_dir(TarManager *tar, char *dirname, char *appendpath)
             }
             if (S_ISDIR(buf.st_mode))
             {
+                add_file(tar, curr_file->d_name, appath);
                 add_dir(tar, currfile->d_name, appath);
             }
             else if (S_ISREG(buf.st_mode))
@@ -136,6 +137,41 @@ void add_dir(TarManager *tar, char *dirname, char *appendpath)
     }
 }
 
+void reorder_headers(TarManager *tar)
+{
+    Dllist reordered = new_dllist();
+    Dllist dirs = new_dllist();
+    Dllist files = new_dllist();
+    Dllist ptr;
+    Dllist head_nil = dll_nil(tar->headers);
+    dll_traverse(ptr, tar->headers)
+    {
+        TarHeader *thead = (TarHeader*) ptr->val.v;
+        if (S_ISDIR(thead->file_stats.st_mode))
+        {
+            dll_append(dirs, new_jval_v(thead));
+        }
+        else if (S_ISREG(thead->file_stats.st_mode))
+        {
+            dll_append(files, new_jval_v(thead));
+        }
+    }
+    free_dllist(tar->headers);
+    dll_traverse(ptr, dirs)
+    {
+        TarHeader *thead = (TarHeader*) ptr->val.v;
+        dll_append(reordered, new_jval_v(thead));
+    }
+    free_dllist(dirs);
+    dll_traverse(ptr, files)
+    {
+        TarHeader *thead = (TarHeader*) ptr->val.v;
+        dll_append(reordered, new_jval_v(thead));
+    }
+    free_dllist(files);
+    tar->headers = reordered;
+}
+
 void print_tar(TarManager *tar, FILE *out)
 {
     FileInfo *finfo;
@@ -152,23 +188,27 @@ void print_tar(TarManager *tar, FILE *out)
         fwrite(&(finfo->header_for_tar->ftype), sizeof(uint8_t), 1, out);
         fwrite(&(finfo->header_for_tar->file_stats), sizeof(struct stat), 1, out);
         fwrite(&(finfo->header_for_tar->checksum), sizeof(int64_t), 1, out);
-        if (finfo->header_for_tar->file_stats.st_nlink > 1)
+        if (finfo->header_for_tar->ftype == JTARNORMAL && 
+            finfo->header_for_tar->file_stats.st_nlink > 1)
         {
             for (int i = 0; i < (int)(finfo->header_for_tar->file_stats.st_nlink-1); i++)
             {
                 fwrite(finfo->header_for_tar->hard_links[i], 100, 1, out);
             }
         }
-        FILE *currfile = fopen(finfo->real_name, "r");
-        if (currfile == NULL)
+        if (finfo->header_for_tar->ftype == JTARNORMAL)
         {
-            fprintf(stderr, "Error: file %s could not be opened\n", finfo->real_name);
-            exit(-1);
+            FILE *currfile = fopen(finfo->real_name, "r");
+            if (currfile == NULL)
+            {
+                fprintf(stderr, "Error: file %s could not be opened\n", finfo->real_name);
+                exit(-1);
+            }
+            char *buf = (char*) malloc(finfo->header_for_tar->file_stats.st_size);
+            fread(buf, finfo->header_for_tar->file_stats.st_size, 1, currfile);
+            fwrite(buf, finfo->header_for_tar->file_stats.st_size, 1, out);
+            fclose(currfile);
         }
-        char *buf = (char*) malloc(finfo->header_for_tar->file_stats.st_size);
-        fread(buf, finfo->header_for_tar->file_stats.st_size, 1, currfile);
-        fwrite(buf, finfo->header_for_tar->file_stats.st_size, 1, out);
-        fclose(currfile);
     }
 }
 
@@ -211,7 +251,14 @@ void read_tar(FILE *tarfile)
             }
             exit(-1);
         }
-        recreate_file(thead, fdata);
+        if (thead->ftype == JTARDIR)
+        {
+            recreate_dir(thead);
+        }
+        else if (thead->ftype == JTARNORMAL)
+        {
+            recreate_file(thead, fdata);
+        }
         free(fdata);
         free(header);
         header = (char*) malloc((100+sizeof(uint8_t)+sizeof(struct stat)+sizeof(int64_t)));
@@ -247,7 +294,7 @@ char* create_subdirs(char *fname)
     next_sub = strtok(NULL, "/");
     while (next_sub != NULL)
     {
-        create_dir(new_dir);
+        //create_dir(new_dir);
         if ( chdir(new_dir) != 0 )
         {
             fprintf(stderr, "Error: Could not enter %s\n", new_dir);
@@ -320,6 +367,24 @@ void recreate_file(TarHeader *thead, char *filedata)
                 exit(-1);
             }
         }
+    }
+}
+
+void recreate_dir(TarHeader *thead)
+{
+    create_dir(thead->tar_name);
+    if ( chmod(thead->tar_name, thead->file_stats.st_mode) != 0 )
+    {
+        fprintf(stderr, "Error: Could not change modification data for %s\n", thead->tar_name);
+        exit(-1);
+    }
+    struct utimbuf times;
+    times.actime = thead->file_stats.st_atime;
+    times.modtime = thead->file_stats.st_mtime;
+    if ( utime(thead->tar_name, &times) != 0 )
+    {
+        fprintf(stderr, "Error: Could not change time data for %s\n", thead->tar_name);
+        exit(-1);
     }
 }
 

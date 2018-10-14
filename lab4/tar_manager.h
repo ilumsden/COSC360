@@ -25,6 +25,8 @@ void add_file(TarManager *tar, char *fname, char *appendpath);
 
 void add_dir(TarManager *tar, char *dirname, char *appendpath);
 
+extern void reorder_headers(TarManager *tar);
+
 extern void print_tar(TarManager *tar, FILE *out);
 
 extern void free_tarmanager(TarManager *tar);

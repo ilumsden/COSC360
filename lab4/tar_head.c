@@ -133,7 +133,7 @@ FileInfo* create_header(char *fname, char *path_to_file)
         exit(-1);
     }
     thead->checksum = calc_checksum(thead);
-    if (thead->file_stats.st_nlink > 1)
+    if (thead->ftype == JTARNORMAL && thead->file_stats.st_nlink > 1)
     {
         thead->hard_links = (char**) malloc((thead->file_stats.st_nlink-1)*sizeof(char*));
         for (int i = 0; i < (int)(thead->file_stats.st_nlink-1); i++)

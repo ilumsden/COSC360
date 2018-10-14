@@ -15,6 +15,7 @@ int main(int argc, char **argv)
         {
             add(tar, argv[i]);
         }
+        reorder_headers(tar);
         print_tar(tar, stdout);
         free_tarmanager(tar);
     }
