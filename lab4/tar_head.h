@@ -3,6 +3,7 @@
 
 #define _POSIX_C_SOURCE 200809L
 #define _XOPEN_SOURCE 700
+#define _GNU_SOURCE
 
 #include <features.h>
 #include <stdbool.h>
@@ -13,6 +14,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+// Copied from linux/limits.h
+#define PATH_MAX 4096
 
 extern bool dir_eq(char *dir1, char *dir2);
 
@@ -28,7 +32,7 @@ void remove_substring(char *s, const char *sub);
 typedef struct header_t
 { 
     // offset = 0
-    char tar_name[100];
+    char tar_name[PATH_MAX];
     // offset = 100
     uint8_t ftype;
     // offset = 101
@@ -43,7 +47,7 @@ int64_t calc_checksum(TarHeader* thead);
 
 typedef struct file_tarinfo_t
 {
-    char real_name[100];
+    char real_name[PATH_MAX];
     TarHeader *header_for_tar;
 } FileInfo;
 

@@ -25,13 +25,36 @@ void add(TarManager *tar, char *fname)
     }
     else if (S_ISDIR(buf.st_mode))
     {
-        add_dir(tar, fname, "");
+        add_dir(tar, fname, "", false);
     }
     return;
 }
 
 void add_file(TarManager *tar, char *fname, char *appendpath)
 {
+    char *new_dir, *next_sub;
+    char *app = (char*) malloc(PATH_MAX);
+    app[0] = 0;
+    bool first = true;
+    new_dir = strtok(fname, "/");
+    next_sub = strtok(NULL, "/");
+    while (next_sub != NULL)
+    {
+        add_dir(tar, new_dir, app, true);
+        if (first)
+        {
+            strcpy(app, new_dir);
+            first = false;
+        }
+        else
+        {
+            strcat(app, "/");
+            strcat(app, new_dir);
+        }
+        strcpy(new_dir, next_sub);
+        next_sub = strtok(NULL, "/");
+    }
+    free(app);
     FileInfo *finfo;
     finfo = create_header(fname, appendpath);
     Dllist ptr;
@@ -44,7 +67,11 @@ void add_file(TarManager *tar, char *fname, char *appendpath)
             break;
         }
         FileInfo *curr = (FileInfo*) ptr->val.v;
-        if (header_eq(finfo->header_for_tar, curr->header_for_tar) && (strcmp(finfo->real_name, curr->real_name) != 0))
+        if (curr == NULL)
+        {
+            break;
+        }
+        if (header_eq(finfo->header_for_tar, curr->header_for_tar) && (strcmp(finfo->real_name, curr->real_name) == 0))
         {
             present = true;
             break;
@@ -60,7 +87,7 @@ void add_file(TarManager *tar, char *fname, char *appendpath)
     }
     if (!present)
     {
-        dll_append(tar->headers, new_jval_v(finfo));
+        dll_append(tar->headers, new_jval_v((void*)finfo));
         tar->num_files++;
     }
     else
@@ -70,12 +97,14 @@ void add_file(TarManager *tar, char *fname, char *appendpath)
 }
 
 // TODO: Find way to prepend path to files
-void add_dir(TarManager *tar, char *dirname, char *appendpath)
+void add_dir(TarManager *tar, char *dirname, char *appendpath, bool from_add_file)
 {
-    char *cwd = (char*) malloc(50);
-    if ( getcwd(cwd, 50) == NULL )
+    char *cwd = (char*) malloc(1024);
+    cwd[0] = 0;
+    if ( getcwd(cwd, 1024) == NULL )
     {
-        fprintf(stderr, "Error: Could not get current working directory\n");
+        //fprintf(stderr, "Error: Could not get current working directory\n");
+        perror("Error: Could not get current working directory\n");
         exit(-1);
     }
     DIR *currdir;
@@ -83,6 +112,12 @@ void add_dir(TarManager *tar, char *dirname, char *appendpath)
     currdir = opendir(dirname);
     if (currdir != NULL)
     {
+        if (from_add_file)
+        {
+            add_file(tar, dirname, appendpath);
+            closedir(currdir);
+            return;
+        }
         char *appath = (char*) malloc(strlen(appendpath) + strlen(dirname) + 2);
         appath[0] = 0;
         if (strcmp(appendpath, "") == 0)
@@ -100,6 +135,7 @@ void add_dir(TarManager *tar, char *dirname, char *appendpath)
             fprintf(stderr, "Error: could not move to directory %s\n", dirname);
             exit(-1);
         }
+        // Update to close directories ASAP
         while ((currfile = readdir(currdir)) != NULL)
         {
             if (strcmp(currfile->d_name, ".") == 0 || strcmp(currfile->d_name, "..") == 0)
@@ -114,27 +150,31 @@ void add_dir(TarManager *tar, char *dirname, char *appendpath)
             }
             if (S_ISDIR(buf.st_mode))
             {
-                add_file(tar, curr_file->d_name, appath);
-                add_dir(tar, currfile->d_name, appath);
+                add_file(tar, currfile->d_name, appath);
+                add_dir(tar, currfile->d_name, appath, false);
             }
             else if (S_ISREG(buf.st_mode))
             {
                 add_file(tar, currfile->d_name, appath);
             }
         }
+        free(appath);
     }
     else
     {
-        fprintf(stderr, "Error: could not open directory %s\n", dirname);
+        //fprintf(stderr, "Error: could not open directory %s/%s\n", appendpath, dirname);
+        perror("Error: could not open directory\n");
         closedir(currdir);
         exit(-1);
     }
-    closedir(currdir);
+    //closedir(currdir);
+    //free(realdir);
     if ( chdir(cwd) != 0 )
     {
         fprintf(stderr, "Error: could not move to previous directory %s\n", dirname);
         exit(-1);
     }
+    free(cwd);
 }
 
 void reorder_headers(TarManager *tar)
@@ -146,27 +186,32 @@ void reorder_headers(TarManager *tar)
     Dllist head_nil = dll_nil(tar->headers);
     dll_traverse(ptr, tar->headers)
     {
-        TarHeader *thead = (TarHeader*) ptr->val.v;
-        if (S_ISDIR(thead->file_stats.st_mode))
+        if (ptr == head_nil)
         {
-            dll_append(dirs, new_jval_v(thead));
+            break;
         }
-        else if (S_ISREG(thead->file_stats.st_mode))
+        TarHeader *thead = (TarHeader*) ptr->val.v;
+        fprintf(stderr, "thead is %p\n", thead);
+        if (thead->ftype == JTARDIR)
         {
-            dll_append(files, new_jval_v(thead));
+            dll_append(dirs, new_jval_v((void*)thead));
+        }
+        else if (thead->ftype == JTARNORMAL)
+        {
+            dll_append(files, new_jval_v((void*)thead));
         }
     }
     free_dllist(tar->headers);
     dll_traverse(ptr, dirs)
     {
         TarHeader *thead = (TarHeader*) ptr->val.v;
-        dll_append(reordered, new_jval_v(thead));
+        dll_append(reordered, new_jval_v((void*)thead));
     }
     free_dllist(dirs);
     dll_traverse(ptr, files)
     {
         TarHeader *thead = (TarHeader*) ptr->val.v;
-        dll_append(reordered, new_jval_v(thead));
+        dll_append(reordered, new_jval_v((void*)thead));
     }
     free_dllist(files);
     tar->headers = reordered;
@@ -184,7 +229,7 @@ void print_tar(TarManager *tar, FILE *out)
             break;
         }
         finfo = (FileInfo*) ptr->val.v;
-        fwrite(finfo->header_for_tar->tar_name, 100, 1, out);
+        fwrite(finfo->header_for_tar->tar_name, PATH_MAX, 1, out);
         fwrite(&(finfo->header_for_tar->ftype), sizeof(uint8_t), 1, out);
         fwrite(&(finfo->header_for_tar->file_stats), sizeof(struct stat), 1, out);
         fwrite(&(finfo->header_for_tar->checksum), sizeof(int64_t), 1, out);
@@ -193,7 +238,7 @@ void print_tar(TarManager *tar, FILE *out)
         {
             for (int i = 0; i < (int)(finfo->header_for_tar->file_stats.st_nlink-1); i++)
             {
-                fwrite(finfo->header_for_tar->hard_links[i], 100, 1, out);
+                fwrite(finfo->header_for_tar->hard_links[i], PATH_MAX, 1, out);
             }
         }
         if (finfo->header_for_tar->ftype == JTARNORMAL)
@@ -207,6 +252,7 @@ void print_tar(TarManager *tar, FILE *out)
             char *buf = (char*) malloc(finfo->header_for_tar->file_stats.st_size);
             fread(buf, finfo->header_for_tar->file_stats.st_size, 1, currfile);
             fwrite(buf, finfo->header_for_tar->file_stats.st_size, 1, out);
+            free(buf);
             fclose(currfile);
         }
     }
@@ -215,59 +261,70 @@ void print_tar(TarManager *tar, FILE *out)
 void read_tar(FILE *tarfile)
 {
     TarHeader *thead;
-    char *header = (char*) malloc((100+sizeof(uint8_t)+sizeof(struct stat)+sizeof(int64_t)));
+    char *header = (char*) malloc((PATH_MAX+sizeof(uint8_t)+sizeof(struct stat)+sizeof(int64_t)));
     char *fdata;
-    while (fread(header, (100+sizeof(uint8_t)+sizeof(struct stat)+sizeof(int64_t)), 1, tarfile) == 1)
+    TarHeader* dirs[100];
+    int num_dirs = 0;
+    while (fread(header, (PATH_MAX+sizeof(uint8_t)+sizeof(struct stat)+sizeof(int64_t)), 1, tarfile) == 1)
     {
         thead = parse_header(header);
-        if (thead->file_stats.st_nlink > 1)
+        if (thead->ftype == JTARNORMAL)
         {
-            for (int i = 0; i < (int)(thead->file_stats.st_nlink-1); i++)
+            if (thead->file_stats.st_nlink > 1)
             {
-                if (fread(thead->hard_links[i], 100, 1, tarfile) != 1)
+                for (int i = 0; i < (int)(thead->file_stats.st_nlink-1); i++)
                 {
-                    if (feof(tarfile))
+                    if (fread(thead->hard_links[i], PATH_MAX, 1, tarfile) != 1)
                     {
-                        fprintf(stderr, "Error: EOF reached early.\n");
+                        if (feof(tarfile))
+                        {
+                            fprintf(stderr, "Error: EOF reached early.\n");
+                        }
+                        else
+                        {
+                            fprintf(stderr, "Error: could not read in the hard link name.\n");
+                        }
+                        exit(-1);
                     }
-                    else
-                    {
-                        fprintf(stderr, "Error: could not read in the hard link name.\n");
-                    }
-                    exit(-1);
                 }
             }
-        }
-        fdata = (char*) malloc(thead->file_stats.st_size);
-        if (fread(fdata, thead->file_stats.st_size, 1, tarfile) != 1)
-        {
-            if (feof(tarfile))
+            fdata = (char*) malloc(thead->file_stats.st_size);
+            if (fread(fdata, thead->file_stats.st_size, 1, tarfile) != 1)
             {
-                fprintf(stderr, "Error: EOF reached early.\n");
+                if (feof(tarfile))
+                {
+                    fprintf(stderr, "Error: EOF reached early.\n");
+                }
+                else
+                {
+                    fprintf(stderr, "Error: could not read in file data.\n");
+                }
+                exit(-1);
             }
-            else
-            {
-                fprintf(stderr, "Error: could not read in file data.\n");
-            }
-            exit(-1);
-        }
-        if (thead->ftype == JTARDIR)
-        {
-            recreate_dir(thead);
-        }
-        else if (thead->ftype == JTARNORMAL)
-        {
             recreate_file(thead, fdata);
+            free(fdata);
+            free_tarheader(thead);
         }
-        free(fdata);
+        else if (thead->ftype == JTARDIR)
+        {
+            dirs[num_dirs] = thead;
+            num_dirs++;
+            //recreate_dir(thead);
+        }
         free(header);
-        header = (char*) malloc((100+sizeof(uint8_t)+sizeof(struct stat)+sizeof(int64_t)));
+        header = (char*) malloc((PATH_MAX+sizeof(uint8_t)+sizeof(struct stat)+sizeof(int64_t)));
     }
     free(header);
     if (!feof(tarfile))
     {
         fprintf(stderr, "Error: reading ended before end of file\n");
         exit(-1);
+    }
+    for (int i = num_dirs-1; i >= 0; i--)
+    {
+        TarHeader *th = dirs[i];
+        recreate_dir(th);
+        free_tarheader(th);
     }
 }
 
@@ -286,15 +343,12 @@ void create_dir(char *dirname)
 
 char* create_subdirs(char *fname)
 {
-    char *new_dir = (char*) malloc(50);
-    char *next_sub = (char*) malloc(50);
-    new_dir[0] = 0;
-    next_sub[0] = 0;
+    char *new_dir, *next_sub;
     new_dir = strtok(fname, "/");
     next_sub = strtok(NULL, "/");
     while (next_sub != NULL)
     {
-        //create_dir(new_dir);
+        create_dir(new_dir);
         if ( chdir(new_dir) != 0 )
         {
             fprintf(stderr, "Error: Could not enter %s\n", new_dir);
@@ -303,15 +357,18 @@ char* create_subdirs(char *fname)
         strcpy(new_dir, next_sub);
         next_sub = strtok(NULL, "/");
     }
+    free(next_sub);
     return new_dir;
 }
 
 void recreate_file(TarHeader *thead, char *filedata)
 {
-    char *cwd = (char*) malloc(50);
-    if ( getcwd(cwd, 50) == NULL )
+    char *cwd = (char*) malloc(1024);
+    cwd[0] = 0;
+    if ( getcwd(cwd, 1024) == NULL )
     {
-        fprintf(stderr, "Error: Could not get current working directory\n");
+        //fprintf(stderr, "Error: Could not get current working directory\n");
+        perror("Error: Could not get current working directory\n");
         exit(-1);
     }
     char *fname = create_subdirs(thead->tar_name);
@@ -329,7 +386,7 @@ void recreate_file(TarHeader *thead, char *filedata)
     fclose(f);
     if ( chmod(fname, thead->file_stats.st_mode) != 0 )
     {
-        fprintf(stderr, "Error: Could not change modification data for %s\n", thead->tar_name);
+        fprintf(stderr, "Error (recreate_file): Could not change modification data for %s\n", thead->tar_name);
         exit(-1);
     }
     struct utimbuf times;
@@ -368,14 +425,37 @@ void recreate_file(TarHeader *thead, char *filedata)
             }
         }
     }
+    free(cwd);
+    free(absname);
 }
 
 void recreate_dir(TarHeader *thead)
 {
-    create_dir(thead->tar_name);
+    char *cwd = (char*) malloc(1024);
+    cwd[0] = 0;
+    if ( getcwd(cwd, 1024) == NULL )
+    {
+        //fprintf(stderr, "Error: Could not get current working directory\n");
+        perror("Error: Could not get current working directory\n");
+        exit(-1);
+    }
+    struct stat buf;
+    if ( lstat(thead->tar_name, &buf) != 0 )
+    {
+        char *tmp = strdup(thead->tar_name);
+        char *deepest_dir = create_subdirs(tmp);
+        create_dir(deepest_dir);
+        free(tmp);
+        if ( chdir(cwd) != 0 )
+        {
+            fprintf(stderr, "Error: Could not enter original directory\n");
+            exit(-1);
+        }
+    }
+    free(cwd);
     if ( chmod(thead->tar_name, thead->file_stats.st_mode) != 0 )
     {
-        fprintf(stderr, "Error: Could not change modification data for %s\n", thead->tar_name);
+        fprintf(stderr, "Error (recreate_dir): Could not change modification data for %s\n", thead->tar_name);
         exit(-1);
     }
     struct utimbuf times;
@@ -384,6 +464,12 @@ void recreate_dir(TarHeader *thead)
     if ( utime(thead->tar_name, &times) != 0 )
     {
         fprintf(stderr, "Error: Could not change time data for %s\n", thead->tar_name);
+        exit(-1);
+    }
+    struct stat buf1;
+    if ( lstat(thead->tar_name, &buf) != 0 )
+    {
+        fprintf(stderr, "Error");
         exit(-1);
     }
 }

@@ -63,9 +63,13 @@ void remove_substring(char *s, const char *sub)
 int64_t calc_checksum(TarHeader *thead)
 {
     int64_t sum = 0;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < PATH_MAX; i++)
     {
-        sum += 0xFF & thead->tar_name[i];
+        if (thead->tar_name[i] == 0)
+        {
+            break;
+        }
+        sum += (int64_t) thead->tar_name[i];
     }
     sum += thead->ftype;
     sum += (int) thead->file_stats.st_dev;
@@ -89,6 +93,13 @@ FileInfo* create_header(char *fname, char *path_to_file)
 {
     FileInfo *finfo = (FileInfo*) malloc(sizeof(FileInfo));
     TarHeader *thead = (TarHeader*) malloc(sizeof(TarHeader));
+    finfo->real_name[0] = 0;
+    thead->tar_name[0] = 0;
+    thead->ftype = 4;
+    memset(&(thead->file_stats), 0, sizeof(struct stat));
+    thead->checksum = 0;
+    thead->hard_links = (char**) malloc(sizeof(char*));
+    thead->linknum = 0;
     if (strcmp(path_to_file, "") != 0)
     {
         char *modname = (char*) malloc(strlen(path_to_file) + strlen(fname) + 2);
@@ -110,7 +121,7 @@ FileInfo* create_header(char *fname, char *path_to_file)
         strcpy(thead->tar_name, fname);
         //free(tmp_str);
     }
-    if ( lstat(fname, &thead->file_stats) != 0 )
+    if ( lstat(fname, &(thead->file_stats)) != 0 )
     {
         fprintf(stderr, "Error (create_header): Could not stat %s\n", fname);
         exit(-1);
@@ -135,20 +146,22 @@ FileInfo* create_header(char *fname, char *path_to_file)
     thead->checksum = calc_checksum(thead);
     if (thead->ftype == JTARNORMAL && thead->file_stats.st_nlink > 1)
     {
+        free(thead->hard_links);
         thead->hard_links = (char**) malloc((thead->file_stats.st_nlink-1)*sizeof(char*));
         for (int i = 0; i < (int)(thead->file_stats.st_nlink-1); i++)
         {
-            thead->hard_links[i] = (char*) malloc(100);
+            thead->hard_links[i] = (char*) malloc(PATH_MAX);
             thead->hard_links[i][0] = 0;
         }
     }
     else
     {
+        free(thead->hard_links);
         thead->hard_links = (char**) malloc(sizeof(char*));
         thead->hard_links[0] = (char*) malloc(1);
         thead->hard_links[0][0] = 0;
     }
-    thead->linknum = 0;
+    //thead->linknum = 0;
     finfo->header_for_tar = thead;
     return finfo;
 }
@@ -156,10 +169,10 @@ FileInfo* create_header(char *fname, char *path_to_file)
 TarHeader* parse_header(char *head)
 {
     TarHeader *thead = (TarHeader*) malloc(sizeof(TarHeader));
-    memcpy(thead->tar_name, &head[0], 100);
-    memcpy(&thead->ftype, &head[100], 1);
-    memcpy(&thead->file_stats, &head[101], 144);
-    memcpy(&thead->checksum, &head[245], 8);
+    memcpy(thead->tar_name, &head[0], PATH_MAX);
+    memcpy(&thead->ftype, &head[PATH_MAX], 1);
+    memcpy(&thead->file_stats, &head[PATH_MAX+1], 144);
+    memcpy(&thead->checksum, &head[PATH_MAX+145], 8);
     int64_t calc_sum = calc_checksum(thead);
     if (thead->checksum != calc_sum)
     {
@@ -171,7 +184,7 @@ TarHeader* parse_header(char *head)
         thead->hard_links = (char**) malloc((thead->file_stats.st_nlink-1)*sizeof(char*));
         for (int i = 0; i < (int)(thead->file_stats.st_nlink-1); i++)
         {
-            thead->hard_links[i] = (char*) malloc(100);
+            thead->hard_links[i] = (char*) malloc(PATH_MAX);
             thead->hard_links[i][0] = 0;
         }
     }
@@ -192,7 +205,7 @@ void free_fileinfo(FileInfo *finfo)
 
 void free_tarheader(TarHeader *thead)
 {
-    if (thead->file_stats.st_nlink > 1)
+    if (thead->file_stats.st_nlink > 1 && thead->ftype == JTARNORMAL)
     {
         for (int i = 0; i < (int)(thead->file_stats.st_nlink-1); i++)
         {

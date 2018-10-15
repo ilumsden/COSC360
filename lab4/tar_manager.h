@@ -23,7 +23,7 @@ extern void add(TarManager *tar, char *fname);
 
 void add_file(TarManager *tar, char *fname, char *appendpath);
 
-void add_dir(TarManager *tar, char *dirname, char *appendpath);
+void add_dir(TarManager *tar, char *dirname, char *appendpath, bool from_add_dir);
 
 extern void reorder_headers(TarManager *tar);
 
@@ -38,5 +38,7 @@ void create_dir(char *dirname);
 char* create_subdirs(char *fname);
 
 void recreate_file(TarHeader *thead, char *filedata);
+
+extern void recreate_dir(TarHeader *thead);
 
 #endif
