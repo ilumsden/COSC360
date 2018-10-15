@@ -145,7 +145,7 @@ void add_dir(TarManager *tar, char *dirname, char *appendpath, bool from_add_fil
             }
             else
             {
-                dll_append(dirs, new_jval_s(currfile->d_name));
+                dll_append(dirs, new_jval_s(strdup(currfile->d_name)));
             }
         }
         closedir(currdir);
@@ -153,12 +153,17 @@ void add_dir(TarManager *tar, char *dirname, char *appendpath, bool from_add_fil
         Dllist dir_nil = dll_nil(dirs);
         dll_traverse(ptr, dirs)
         {
+            if (ptr == dir_nil)
+            {
+                break;
+            }
             char *currfname = ptr->val.s;
             struct stat buf;
             //if ( lstat(currfile->d_name, &buf) != 0 )
             if ( lstat(currfname, &buf) != 0 )
             {
-                fprintf(stderr, "Error: could not stat %s\n", currfile->d_name);
+                //fprintf(stderr, "Error: could not stat %s\n", currfile->d_name);
+                fprintf(stderr, "Error: could not stat %s\n", currfname);
                 exit(-1);
             }
             if (S_ISDIR(buf.st_mode))
@@ -173,7 +178,9 @@ void add_dir(TarManager *tar, char *dirname, char *appendpath, bool from_add_fil
                 //add_file(tar, currfile->d_name, appath);
                 add_file(tar, currfname, appath);
             }
+            free(currfname);
         }
+        free_dllist(dirs);
         free(appath);
     }
     else

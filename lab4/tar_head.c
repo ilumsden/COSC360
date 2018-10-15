@@ -103,13 +103,20 @@ FileInfo* create_header(char *fname, char *path_to_file)
     if (strcmp(path_to_file, "") != 0)
     {
         char *modname = (char*) malloc(strlen(path_to_file) + strlen(fname) + 2);
+        modname[0] = 0;
         strcpy(modname, path_to_file);
-        strcat(modname, "/");
-        strcat(modname, fname);
+        strncat(modname, "/", 1);
+        strncat(modname, fname, strlen(fname));
         strcpy(finfo->real_name, modname);
         //char* tmp_str = remove_relative_specifiers_from_path(modname);
         //strcpy(thead->tar_name, tmp_str);
         strcpy(thead->tar_name, modname);
+        if (fname[0] == '/')
+        {
+            char *tmp = strdup(fname);
+            strcpy(fname, tmp+1);
+            free(tmp);
+        }
         //free(tmp_str);
         free(modname);
     }
