@@ -107,6 +107,7 @@ void add_dir(TarManager *tar, char *dirname, char *appendpath, bool from_add_fil
         perror("Error: Could not get current working directory\n");
         exit(-1);
     }
+    Dllist dirs = new_dllist();
     DIR *currdir;
     struct dirent *currfile;
     currdir = opendir(dirname);
@@ -142,20 +143,35 @@ void add_dir(TarManager *tar, char *dirname, char *appendpath, bool from_add_fil
             {
                 continue;
             }
+            else
+            {
+                dll_append(dirs, new_jval_s(currfile->d_name));
+            }
+        }
+        closedir(currdir);
+        Dllist ptr;
+        Dllist dir_nil = dll_nil(dirs);
+        dll_traverse(ptr, dirs)
+        {
+            char *currfname = ptr->val.s;
             struct stat buf;
-            if ( lstat(currfile->d_name, &buf) != 0 )
+            //if ( lstat(currfile->d_name, &buf) != 0 )
+            if ( lstat(currfname, &buf) != 0 )
             {
                 fprintf(stderr, "Error: could not stat %s\n", currfile->d_name);
                 exit(-1);
             }
             if (S_ISDIR(buf.st_mode))
             {
-                add_file(tar, currfile->d_name, appath);
-                add_dir(tar, currfile->d_name, appath, false);
+                //add_file(tar, currfile->d_name, appath);
+                add_file(tar, currfname, appath);
+                //add_dir(tar, currfile->d_name, appath, false);
+                add_dir(tar, currfname, appath, false);
             }
             else if (S_ISREG(buf.st_mode))
             {
-                add_file(tar, currfile->d_name, appath);
+                //add_file(tar, currfile->d_name, appath);
+                add_file(tar, currfname, appath);
             }
         }
         free(appath);
