@@ -21,9 +21,6 @@
 #define EDLLTRAVERSE 156 /* Dllist traverse produced a NULL pointer. */
 #define EDESCENDANTCYCLE 157 /* There's a cycle in the tree. */
 
-// Include for the Lab 5 Demo
-#include "../malloc.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

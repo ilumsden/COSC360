@@ -1,5 +1,4 @@
 #include "freelist.h"
-#include <stdint.h>
 
 Flist create_flist()
 {
@@ -178,6 +177,10 @@ void* search_for_extra_space(Flist head, void *currptr, unsigned int currsize, u
 
 void return_block(Flist head, void *ptr)
 {
+    if (head == NULL || ptr == NULL)
+    {
+        return;
+    }
     char *bookptr = (char*) ptr;
     unsigned int checksum = (unsigned int) *(bookptr - 4);
     unsigned int size = (unsigned int) *(bookptr - 8);

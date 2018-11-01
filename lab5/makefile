@@ -1,6 +1,5 @@
 all:
-	make clean; mkdir build; cd build; cmake ..; make; #mv jtar ..
+	make clean; mkdir build; cd build; cmake ..; make; mv demo/famtree ..;
 
 clean:
-	#rm fakemake; 
-	rm -rf build;
+	rm famtree; rm -rf build;

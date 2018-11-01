@@ -3,12 +3,12 @@
 
 static Flist flist_head = NULL;
 
-void* jmalloc(unsigned int size)
+void* malloc(unsigned int size)
 {
     return get_block(flist_head, size);
 }
 
-void* jcalloc(unsigned int nmemb, unsigned int size)
+void* calloc(unsigned int nmemb, unsigned int size)
 {
     void *buf = get_block(flist_head, nmemb*size);
     char *cbuf = (char*) buf;
@@ -22,14 +22,14 @@ void* jcalloc(unsigned int nmemb, unsigned int size)
     return (void*) cbuf;
 }
 
-void* jrealloc(void *ptr, unsigned int size)
+void* realloc(void *ptr, unsigned int size)
 {
     char *cptr = (char*) ptr;
     unsigned int currsize = (unsigned int) *(cptr-8);
     return search_for_extra_space(flist_head, ptr, currsize, size);
 }
 
-void jfree(void *ptr)
+void free(void *ptr)
 {
     return_block(flist_head, ptr);
 }
