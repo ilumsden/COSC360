@@ -13,7 +13,7 @@ else()
     set (CMAKE_C_STANDARD 99)
 endif()
 
-set (CMAKE_C_FLAGS "-Wall -g -O ${CMAKE_C_FLAGS}")
+set (CMAKE_C_FLAGS "-Wall -g -O -fno-builtin-functionname ${CMAKE_C_FLAGS}")
 
 file(GLOB lab5_src "${PROJECT_SOURCE_DIR}/*.c")
 file(GLOB lab5_headers "${PROJECT_SOURCE_DIR}/*.h")

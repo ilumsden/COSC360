@@ -1,4 +1,4 @@
-#include "jmalloc.h"
+#include "malloc.h"
 #include "freelist.h"
 
 static Flist flist_head = NULL;
