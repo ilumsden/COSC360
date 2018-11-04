@@ -66,5 +66,9 @@ void print_stack(char **stack_names, int numstack,...)
 void print_sys(char *buf)
 {
     sprintf(buf, "cat /proc/%d/maps", getpid());
-    system(buf);
+    if ( system(buf) == -1 )
+    {
+        fprintf(stderr, "Error: could not get the /proc data. Aborting print_sys\n");
+        return;
+    }
 }
