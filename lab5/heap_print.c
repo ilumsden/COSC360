@@ -1,3 +1,9 @@
+/* heap_print.c
+ * Author: Ian Lumsden
+ *
+ * Implementation of the functions defined in heap_print.h
+ */
+
 #include "heap_print.h"
 #include <stdio.h>
 #include <sys/types.h>

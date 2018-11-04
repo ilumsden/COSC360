@@ -48,8 +48,12 @@ void* get_block(Flist head, unsigned int size)
     Flist currbuf = head;
     while (currbuf != NULL)
     {
+        // Does nothing if the current buffer is not big enough for the requested size
         if (currbuf->size >= full_size)
         {
+            // If the data is large enough that, after getting the requested data, a new 
+            // Flist object can be created, the requested memory is removed and handed to the user,
+            // and the remainder is placed back into the free list as an Flist object.
             if (currbuf->size - full_size >= 24)
             {
                 if (currbuf->flink != NULL)
@@ -78,6 +82,9 @@ void* get_block(Flist head, unsigned int size)
                 retbuf = (char*) intbuf;
                 return (void*) (retbuf + 4);
             }
+            // If the remaining memory after slicing the requested data is not large enough to
+            // create a new Flist object, all the memory in the current free list element is 
+            // returned to the user.
             else if (currbuf->size - full_size >= 0)
             {
                 if (currbuf->flink != NULL)
@@ -100,11 +107,15 @@ void* get_block(Flist head, unsigned int size)
                 return (void*) (retbuf + 4);
             }
         }
+        // Advances to the next element.
         currbuf = currbuf->flink;
     }
+    // If no free list element can provide the requested data, a new one is created.
     Flist newblock = create_flist();
     unsigned int initsize = newblock->size;
     newblock->size = 0;
+    // The requested memory is sliced off the new free list block, and the remainder of the
+    // block is added to the free list.
     char *split = (char*) newblock;
     Flist returnblock = (Flist) (split + full_size);
     returnblock->size = initsize - full_size;
@@ -123,15 +134,23 @@ void* get_block(Flist head, unsigned int size)
     return (void*) (newbuf + 4);
 }
 
-void* search_for_extra_space(Flist head, void *currptr, unsigned int currsize, unsigned int new_size)
+void* search_for_extra_space(Flist head, void *currptr, unsigned int currsize, 
+                             unsigned int new_size)
 {
+    // Calculates the 8-byte-alligned size of the requested memory block
+    unsigned int size = (new_size % 8 == 0) ? new_size : new_size + (8 - (new_size % 8));
+    // Calculates the difference between the old size and the new size.
+    unsigned int diff = size - currsize;
+    // Loops through the free list elements
     Flist curr = head;
     while (curr != NULL)
     {
+        // If the current element is not contiguous with currptr, move to the next element.
         if (curr == currptr + currsize)
         {
-            unsigned int size = (new_size % 8 == 0) ? new_size : new_size + (8 - (new_size % 8));
-            unsigned int diff = size - currsize;
+            // If the current element does not have enough memory to increase currptr's size to
+            // new_size, get a new memory block from the free list. Then, copy the memory from
+            // currptr to the new block, and return currptr's memory to the free list.
             if (curr->size < diff)
             {
                 void *tmp_block = get_block(head, new_size);
@@ -139,6 +158,7 @@ void* search_for_extra_space(Flist head, void *currptr, unsigned int currsize, u
                 return_block(head, currptr);
                 return tmp_block;
             }
+            // See get_block.
             else if (curr->size - diff >= 24)
             {
                 if (curr->flink != NULL)
@@ -165,6 +185,7 @@ void* search_for_extra_space(Flist head, void *currptr, unsigned int currsize, u
                 charptr = (char*) intptr;
                 return (void *) (charptr + 8);
             }
+            // See get_block
             else if (curr->size - diff >= 0)
             {
                 if (curr->flink != NULL)
@@ -185,8 +206,12 @@ void* search_for_extra_space(Flist head, void *currptr, unsigned int currsize, u
                 return (void *) (charptr + 8);
             }
         }
+        // Advances to the next element.
         curr = curr->flink;
     }
+    // If no free list element is contiguous with currptr, get a new memory block 
+    // from the free list. Then, copy the memory from currptr to the new block, 
+    // and return currptr's memory to the free list.
     void *fin_block = get_block(head, new_size);
     memcpy(fin_block, currptr, currsize);
     return_block(head, currptr);
@@ -195,23 +220,31 @@ void* search_for_extra_space(Flist head, void *currptr, unsigned int currsize, u
 
 void return_block(Flist head, void *ptr)
 {
+    // If NULL is passed as the pointer, do nothing.
     if (head == NULL || ptr == NULL)
     {
         return;
     }
+    // Get the size and checksum from the bookkeeping bytes.
     char *bookptr = (char*) ptr;
     unsigned int checksum = (unsigned int) *(bookptr - 4);
     unsigned int size = (unsigned int) *(bookptr - 8);
+    // Calculate the checksum from the bookkeeping bytes.
     unsigned int calced = calc_checksum(size);
+    // If the calculated checksum doesn't match the bookkeeping checkusm, raise an error
+    // and exit the program.
+    // Note: the _exit system call is used to avoid issues with stdlib.h
     if (calced != checksum)
     {
         fprintf(stderr, "Error: invalid checksum for freed block.\n");
         _exit(1);
     }
+    // Reset all bytes in the block.
     for (int i = -8; i < (int) size; i++)
     {
         *(bookptr + i) = 0;
     }
+    // Convert the block to an Flist and set the data accordingly.
     Flist buf = (Flist) (bookptr - 8);
     buf->size = size + 8;
     if (head != NULL)

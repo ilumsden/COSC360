@@ -1,6 +1,12 @@
 #ifndef _MALLOC_H
 #define _MALLOC_H
 
+/* malloc.h
+ * 
+ * This file was provided by the professor. It is a simple header file used to define my 
+ * implementation of the malloc functions.
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
