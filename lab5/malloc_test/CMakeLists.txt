@@ -18,6 +18,6 @@ set (CMAKE_C_FLAGS "-Wall -g -O -fno-builtin ${CMAKE_C_FLAGS}")
 file(GLOB demo_src "${PROJECT_SOURCE_DIR}/*.c")
 file(GLOB demo_headers "${PROJECT_SOURCE_DIR}/*.h")
 
-add_executable(malloc_test ${demo_src} ${demo_headers})
+add_executable(test_malloc ${demo_src} ${demo_headers})
 
-target_link_libraries(malloc_test PRIVATE jmalloc)
+target_link_libraries(test_malloc PRIVATE jmalloc)
