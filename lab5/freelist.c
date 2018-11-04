@@ -1,7 +1,15 @@
+/* freelist.c
+ * Author: Ian Lumsden
+ *
+ * Implementations of the functions defined in freelist.h
+ */
+
 #include "freelist.h"
 
 Flist create_flist()
 {
+    // Uses sbrk to get a new memory block, sets its size and links to default values, and
+    // returns the block casted to a Flist.
     Flist buf = (Flist) sbrk((intptr_t) MALLOC_BUF_SIZE);
     buf->size = MALLOC_BUF_SIZE;
     buf->flink = NULL;
@@ -11,6 +19,8 @@ Flist create_flist()
 
 unsigned int calc_checksum(unsigned int size)
 {
+    // Produces and returns a checksum for a block of malloced data by XORing the bytes 
+    // representing the size of the block.
     char *bytes = (char*) &size;
     unsigned int checksum = (unsigned int) bytes[0];
     for (int i = 1; i < 4; i++)
@@ -22,7 +32,9 @@ unsigned int calc_checksum(unsigned int size)
 
 void* get_block(Flist head, unsigned int size)
 {
+    // Calculates the 8-byte-alligned size of the requested memory block
     unsigned int full_size = (size % 8 == 0) ? size : size + (8 - (size % 8));
+    // Adds space for the bookkeeping bytes to the size.
     full_size += 8;
     // Because this is developed for a 64-bit architecture, the size of an Flist object
     // is 20 bytes. As a result, for a chunk of malloced memory to be able to be returned
@@ -32,6 +44,7 @@ void* get_block(Flist head, unsigned int size)
     {
         full_size = 24;
     }
+    // Loops through the free list elements
     Flist currbuf = head;
     while (currbuf != NULL)
     {
@@ -172,6 +185,7 @@ void* search_for_extra_space(Flist head, void *currptr, unsigned int currsize, u
                 return (void *) (charptr + 8);
             }
         }
+        curr = curr->flink;
     }
     void *fin_block = get_block(head, new_size);
     memcpy(fin_block, currptr, currsize);
