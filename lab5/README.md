@@ -18,6 +18,8 @@ The `freelist.c` file implements all the underlying logic for the `malloc` funct
 
 This executable is produced by the code in the `lab1` directory. This code is a copy of my solution to `lab1`, but it is slightly reworked to use my implementation of the `malloc` functions.
 
+The `lab1` directory also contains a `test` directory. This directory only contains the `gradescript` and `gradeall` files for lab 1. The `famtree` executable can be moved here to test if it still works when my `malloc` functions are used.
+
 ## test_malloc
 
 This executable is produced by the code in the `malloc_test` directory. This code uses my `malloc` functions to allocate several blocks of memory. It then uses the code included from `heap_print.c/h` to print the heap and stack to `stdout`.
