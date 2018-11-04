@@ -1,7 +1,4 @@
 #include <stdarg.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 typedef unsigned long int UI;
 typedef void (*funcptr)(void);

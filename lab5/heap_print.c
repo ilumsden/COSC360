@@ -1,4 +1,7 @@
 #include "heap_print.h"
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <stdlib.h>
 
 void print_initial()
@@ -66,9 +69,10 @@ void print_stack(char **stack_names, int numstack,...)
 void print_sys(char *buf)
 {
     sprintf(buf, "cat /proc/%d/maps", getpid());
-    if ( system(buf) == -1 )
+    int status;
+    if ( (status = system(buf)) == -1 )
     {
-        fprintf(stderr, "Error: could not get the /proc data. Aborting print_sys\n");
+        fprintf(stderr, "Error (system status = %d): could not get the /proc data. Aborting print_sys\n    Command was %s\n", status, buf);
         return;
     }
 }
