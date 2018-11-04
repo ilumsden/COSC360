@@ -26,6 +26,10 @@ void* realloc(void *ptr, unsigned int size)
 {
     char *cptr = (char*) ptr;
     unsigned int currsize = (unsigned int) *(cptr-8);
+    if (size < currsize)
+    {
+        return ptr;
+    }
     return search_for_extra_space(flist_head, ptr, currsize, size);
 }
 

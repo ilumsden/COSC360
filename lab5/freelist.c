@@ -121,8 +121,10 @@ void* search_for_extra_space(Flist head, void *currptr, unsigned int currsize, u
             unsigned int diff = size - currsize;
             if (curr->size < diff)
             {
+                void *tmp_block = get_block(head, new_size);
+                memcpy(tmp_block, currptr, currsize);
                 return_block(head, currptr);
-                return get_block(head, new_size);
+                return tmp_block;
             }
             else if (curr->size - diff >= 24)
             {
@@ -171,8 +173,10 @@ void* search_for_extra_space(Flist head, void *currptr, unsigned int currsize, u
             }
         }
     }
+    void *fin_block = get_block(head, new_size);
+    memcpy(fin_block, currptr, currsize);
     return_block(head, currptr);
-    return get_block(head, new_size);
+    return fin_block;
 }
 
 void return_block(Flist head, void *ptr)

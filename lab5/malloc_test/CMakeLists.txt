@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
-project(CS360Lab5)
+project(CS360Lab5Demo)
 enable_language(C)
 
-option(PERSONAL "Builds lab 5 for a non-Hydra computer." OFF)
+option(PERSONAL "Builds lab 5's test for malloc for a non-Hydra computer." OFF)
 
 if (CMAKE_VERSION VERSION_LESS "3.1")
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
@@ -15,10 +15,9 @@ endif()
 
 set (CMAKE_C_FLAGS "-Wall -g -O -fno-builtin ${CMAKE_C_FLAGS}")
 
-file(GLOB lab5_src "${PROJECT_SOURCE_DIR}/*.c")
-file(GLOB lab5_headers "${PROJECT_SOURCE_DIR}/*.h")
+file(GLOB demo_src "${PROJECT_SOURCE_DIR}/*.c")
+file(GLOB demo_headers "${PROJECT_SOURCE_DIR}/*.h")
 
-add_library(jmalloc SHARED ${lab5_src} ${lab5_headers})
+add_executable(malloc_test ${demo_src} ${demo_headers})
 
-add_subdirectory("lab1")
-add_subdirectory("malloc_test")
+target_link_libraries(malloc_test PRIVATE jmalloc)
