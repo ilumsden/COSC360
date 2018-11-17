@@ -1,4 +1,4 @@
-#include "spawner.h"
+#include "piper.h"
 #include <ctype.h>
 
 #define MAX_COMMAND_LEN 2048
@@ -65,45 +65,12 @@ int main(int argc, char **argv)
         }
         int num_coms = 0;
         char** command = split_command(input, &num_coms);
-        if (strcmp(command[0], "cd") == 0)
-        {
-            printf("%s ", prompt);
-            cd(command[1]);
-            continue;
-        }
-        char *inpipe = NULL;
-        char *outpipe = NULL;
-        char *appipe = NULL;
-        int pind = find_input_pipe(command);
-        if (pind != -1)
-        {
-            inpipe = command[pind+1];
-        }
-        pind = find_output_pipe(command);
-        if (pind != -1)
-        {
-            outpipe = command[pind+1];
-        }
-        pind = find_append_pipe(command);
-        if (pind != -1)
-        {
-            appipe = command[pind+1];
-        }
-        if (strcmp(command[0], "exit") == 0)
+        Piper p = create_piper(command, num_coms);
+        int ret = run_commands(p);
+        free_piper(p);
+        if (ret == 1)
         {
             break;
-        }
-        else if (strcmp(command[num_coms-2], "&") != 0)
-        {
-            spawn_synchronous_process(command, inpipe, outpipe, appipe);
-        }
-        else if (strcmp(command[num_coms-2], "&") == 0)
-        {
-            spawn_asynchronous_process(command, num_coms, inpipe, outpipe, appipe);
-        }
-        else
-        {
-            fprintf(stderr, "Invalid input.\n");
         }
         printf("%s ", prompt);
     }

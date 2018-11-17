@@ -5,6 +5,23 @@
 
 #define PATH_MAX 4096
 
+pid_t pidwait(pid_t pid, int *stats)
+{
+    if (pid < -1 || pid == 0)
+    {
+        fprintf(stderr, "Invalid PID passed to pidwait.\n");
+        return 0;
+    }
+    while (1)
+    {
+        pid_t retpid = wait(stats);
+        if (pid == -1 || retpid == pid || retpid == (pid_t) -1)
+        {
+            return retpid;
+        }
+    }
+}
+
 void cd(char *path)
 {
     char *corr_path;
@@ -28,48 +45,53 @@ void cd(char *path)
 }
 
 void spawn_synchronous_process(char **newargv, const char *inpipe, const char *outpipe,
-        const char *appendpipe)
+        const char *appendpipe, int infd, int outfd)
 {
     int pid, status;
     int fd;
     pid = fork();
     if (pid == 0)
     {
+        if (!(infd <= -1))
+        {
+            dup2(infd, 0);
+        }
+        if (!(outfd <= -1))
+        {
+            dup2(outfd, 1);
+        }
         if (inpipe != NULL)
         {
             fd = open(inpipe, O_RDONLY);
             if (fd < 0)
             {
-                fprintf(stderr, "Error: could not open file for input piping. Aborting \
-                        command.\n");
+                fprintf(stderr, "Error: could not open file for input piping. Aborting command.\n");
                 close(fd);
-                return;
+                exit(-1);
             }
             dup2(fd, 0);
             close(fd);
         }
         if (outpipe != NULL)
         {
-            fd = open(outpipe, O_WRONLY | O_CREAT | O_SYNC | O_TRUNC, 0666);
+            fd = open(outpipe, O_WRONLY | O_CREAT | O_SYNC | O_TRUNC, S_IRWXU | S_IRGRP | S_IROTH);
             if (fd < 0)
             {
-                fprintf(stderr, "Error: could not open file for output piping. Aborting \
-                        command.\n");
+                fprintf(stderr, "Error: could not open file for output piping. Aborting command.\n");
                 close(fd);
-                return;
+                exit(-1);
             }
             dup2(fd, 1);
             close(fd);
         }
         if (appendpipe != NULL)
         {
-            fd = open(outpipe, O_WRONLY | O_CREAT | O_SYNC | O_APPEND, 0666);
+            fd = open(appendpipe, O_RDWR | O_CREAT | O_SYNC | O_APPEND, S_IRWXU | S_IRGRP | S_IROTH);
             if (fd < 0)
             {
-                fprintf(stderr, "Error: could not open file for output piping. Aborting \
-                        command.\n");
+                fprintf(stderr, "Error: could not open file for append piping. Aborting command.\n");
                 close(fd);
-                return;
+                exit(-1);
             }
             dup2(fd, 1);
             close(fd);
@@ -87,12 +109,12 @@ void spawn_synchronous_process(char **newargv, const char *inpipe, const char *o
     }
     else
     {
-        wait(&status);
+        pidwait(pid, &status);
     }
 }
 
 void spawn_asynchronous_process(char **newargv, int num_coms, const char *inpipe,
-        const char *outpipe, const char *appendpipe)
+        const char *outpipe, const char *appendpipe, int infd, int outfd)
 {
     char **updatedargv = (char**) malloc((num_coms-1)*sizeof(char*));
     for (int i = 0; i < num_coms-1; i++)
@@ -101,7 +123,7 @@ void spawn_asynchronous_process(char **newargv, int num_coms, const char *inpipe
         {
             fprintf(stderr, "Warning: trying to run an asynchronous process when not requested. \
                     Switching to a synchronous process.\n");
-            spawn_synchronous_process(newargv, inpipe, outpipe, appendpipe);
+            spawn_synchronous_process(newargv, inpipe, outpipe, appendpipe, infd, outfd);
             return;
         }
         else if (i == num_coms-2 && strcmp(newargv[i], "&") == 0)
@@ -118,6 +140,14 @@ void spawn_asynchronous_process(char **newargv, int num_coms, const char *inpipe
     pid = fork();
     if (pid == 0)
     {
+        if (!(infd <= -1))
+        {
+            dup2(infd, 0);
+        }
+        if (!(outfd <= -1))
+        {
+            dup2(outfd, 1);
+        }
         if (inpipe != NULL)
         {
             fd = open(inpipe, O_RDONLY);
@@ -177,50 +207,74 @@ void spawn_asynchronous_process(char **newargv, int num_coms, const char *inpipe
     }
 }
 
-int find_input_pipe(char **newargv)
+int find_input_pipe(char **newargv, int size_newargv)
 {
-    char ** tracker = newargv;
     int ind = 0;
-    while (*tracker != NULL)
+    for (int i = 0; i < size_newargv; i++)
     {
-        if (strcmp(*tracker, "<") == 0)
+        if (newargv[i] == NULL)
+        {
+            continue;
+        }
+        if (strcmp(newargv[i], "<") == 0)
         {
             return ind;
         }
-        ++tracker;
         ind++;
     }
     return -1;
 }
 
-int find_output_pipe(char **newargv)
+int find_output_pipe(char **newargv, int size_newargv)
 {
-    char ** tracker = newargv;
     int ind = 0;
-    while (*tracker != NULL)
+    for (int i = 0; i < size_newargv; i++)
     {
-        if (strcmp(*tracker, ">") == 0)
+        if (newargv[i] == NULL)
+        {
+            continue;
+        }
+        if (strcmp(newargv[i], ">") == 0)
         {
             return ind;
         }
-        ++tracker;
         ind++;
     }
     return -1;
 }
 
-int find_append_pipe(char **newargv)
+int find_append_pipe(char **newargv, int size_newargv)
 {
-    char ** tracker = newargv;
     int ind = 0;
-    while (*tracker != NULL)
+    for (int i = 0; i < size_newargv; i++)
     {
-        if (strcmp(*tracker, ">>") == 0)
+        if (newargv[i] == NULL)
+        {
+            continue;
+        }
+        if (strcmp(newargv[i], ">>") == 0)
         {
             return ind;
         }
-        ++tracker;
         ind++;
     }
     return -1;
+}
+
+char** remove_single_pipe(char **newargv, int *size_newargv, int pipe_ind)
+{
+    int ind = 0;
+    char **reducedargv = (char**) malloc(((*size_newargv)-2)*sizeof(char*));
+    for (int i = 0; i < *size_newargv; i++)
+    {
+        if (i != pipe_ind && i != pipe_ind+1)
+        {
+            reducedargv[ind] = newargv[i];
+            ind++;
+        }
+    }
+    *size_newargv -= 2;
+    free(newargv);
+    newargv = reducedargv;
+    return reducedargv;
 }
