@@ -68,6 +68,7 @@ Piper create_piper(char **command, int size_command)
         }
     }
     p->command_list[com_ind] = (char**) malloc((size_command-prev_ind)*sizeof(char*));
+    p->command_lengths[com_ind] = size_command - prev_ind;
     for (int j = 0; j < size_command-prev_ind; j++)
     {
         p->command_list[com_ind][j] = command[prev_ind + j];
