@@ -74,7 +74,7 @@ void spawn_synchronous_process(char **newargv, const char *inpipe, const char *o
         }
         if (outpipe != NULL)
         {
-            fd = open(outpipe, O_WRONLY | O_CREAT | O_SYNC | O_TRUNC, S_IRWXU | S_IRGRP | S_IROTH);
+            fd = open(outpipe, O_WRONLY | O_CREAT | O_SYNC | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
             if (fd < 0)
             {
                 fprintf(stderr, "Error: could not open file for output piping. Aborting command.\n");
@@ -86,7 +86,7 @@ void spawn_synchronous_process(char **newargv, const char *inpipe, const char *o
         }
         if (appendpipe != NULL)
         {
-            fd = open(appendpipe, O_RDWR | O_CREAT | O_SYNC | O_APPEND, S_IRWXU | S_IRGRP | S_IROTH);
+            fd = open(appendpipe, O_RDWR | O_CREAT | O_SYNC | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
             if (fd < 0)
             {
                 fprintf(stderr, "Error: could not open file for append piping. Aborting command.\n");
