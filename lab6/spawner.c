@@ -54,29 +54,23 @@ void spawn_synchronous_process(char **newargv, const char *inpipe, const char *o
     pid = fork();
     if (pid == 0)
     {
-        if (firstproc)
-        {
-            close(infd);
-        }
-        if (finalproc)
-        {
-            close(outfd);
-        }
-        if (infd > -1 && !firstproc)
+        if (infd != 0)
         {
             if (dup2(infd, 0) < 0)
             {
                 fprintf(stderr, "Error: could not link file descriptor %d to the new process's stdin.\n", infd);
                 exit(-1);
             }
+            close(infd);
         }
-        if (outfd > -1 && !finalproc)
+        if (outfd != 1)
         {
             if (dup2(outfd, 1) < 0)
             {
                 fprintf(stderr, "Error: could not link file descriptor %d to the new process's stdout.\n", infd);
                 exit(-1);
             }
+            close(outfd);
         }
         if (inpipe != NULL)
         {
@@ -114,19 +108,6 @@ void spawn_synchronous_process(char **newargv, const char *inpipe, const char *o
             dup2(fd, 1);
             close(fd);
         }
-        if (firstproc && !finalproc)
-        {
-            close(outfd);
-        }
-        else if (!firstproc && finalproc)
-        {
-            close(infd);
-        }
-        else if (!firstproc && !finalproc)
-        {
-            close(infd);
-            close(outfd);
-        }
         if (execvp(newargv[0], newargv) == -1)
         {
             fprintf(stderr, "Error: created new process, but could not launch provided command.\n");
@@ -142,11 +123,6 @@ void spawn_synchronous_process(char **newargv, const char *inpipe, const char *o
     }
     else
     {
-        if (finalproc)
-        {
-            close(infd);
-            close(outfd);
-        }
         pidwait(pid, &status);
     }
 }
@@ -179,13 +155,15 @@ void spawn_asynchronous_process(char **newargv, int num_coms, const char *inpipe
     pid = fork();
     if (pid == 0)
     {
-        if (!(infd <= -1))
+        if (infd != 0)
         {
             dup2(infd, 0);
+            close(infd);
         }
-        if (!(outfd <= -1))
+        if (outfd != 1)
         {
             dup2(outfd, 1);
+            close(outfd);
         }
         if (inpipe != NULL)
         {
@@ -241,10 +219,6 @@ void spawn_asynchronous_process(char **newargv, int num_coms, const char *inpipe
     }
     else
     {
-        if (finalproc)
-        {
-            close(outfd);
-        }
         free(updatedargv);
         return;
     }

@@ -125,19 +125,12 @@ int run_commands(Piper p)
 int _run_sync_commands(Piper p)
 {
     int currpipe[2];
-    if (p->num_commands == 1)
+    if ( pipe(currpipe) == -1 )
     {
-        currpipe[0] = -1;
-        currpipe[1] = -1;
+        fprintf(stderr, "Error: could not create pipe. Aborting command.\n");
+        return -1;
     }
-    else
-    {
-        if ( pipe(currpipe) == -1 )
-        {
-            fprintf(stderr, "Error: could not create pipe. Aborting command.\n");
-            return -1;
-        }
-    }
+    int in = 0;
     for (int i = 0; i < p->num_commands; i++)
     {
         char **command = p->command_list[i];
@@ -173,7 +166,35 @@ int _run_sync_commands(Piper p)
         }
         else if (strcmp(command[p->command_lengths[i]-2], "&") != 0)
         {
-            spawn_synchronous_process(command, inpipe, outpipe, appipe, currpipe[0], currpipe[1], (i==0), (i==p->num_commands-1));
+            if (p->num_commands == 1 || i == p->num_commands-1)
+            {
+                spawn_synchronous_process(command, inpipe, outpipe, appipe, in, 1, false, true);
+                if (in != 0)
+                {
+                    close(in);
+                }
+                close(currpipe[0]);
+                close(currpipe[1]);
+            }
+            else
+            {
+                spawn_synchronous_process(command, inpipe, outpipe, appipe, in, currpipe[1], (i==0), false);
+                if (in == 0)
+                {
+                    in = currpipe[0];
+                }
+                else
+                {
+                    close(in);
+                    in = currpipe[0];
+                }
+                close(currpipe[1]);
+                if ( pipe(currpipe) == -1 )
+                {
+                    fprintf(stderr, "Error: could not create pipe. Aborting command.\n");
+                    return -1;
+                }
+            }
         }
         else if (strcmp(command[p->command_lengths[i]-2], "&") == 0)
         {
