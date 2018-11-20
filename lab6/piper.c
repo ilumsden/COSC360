@@ -55,27 +55,32 @@ void print_commands(char **coms, int size)
 Piper create_piper(char **command, int size_command)
 {
     Piper p = (Piper) malloc(sizeof(Piper));
+    printf("p is %p\nSize is %d\n", p, sizeof(*p));
     char **newcommand;
     int newsize;
+    bool async;
     if (size_command >= 2 && strcmp(command[size_command-2], "&") == 0)
     {
-        p->async = true;
+        async = true;
         newcommand = remove_ampercand(command, size_command);
         newsize = size_command - 1;
     }
     else
     {
-        p->async = false;
+        async = false;
         newcommand = command;
         newsize = size_command;
     }
-    p->num_commands = get_number_of_commands(newcommand, newsize);
-    p->command_list = (char***) malloc(p->num_commands*sizeof(char**));
-    p->command_lengths = (int*) malloc(p->num_commands*sizeof(int));
-    if (p->num_commands == 1)
+    int nc = get_number_of_commands(newcommand, newsize);
+    p->command_list = (char***) malloc(nc*sizeof(char**));
+    int *cl = (int*) malloc(nc*sizeof(int));
+    if (nc == 1)
     {
         p->command_list[0] = newcommand;
-        p->command_lengths[0] = newsize;
+        cl[0] = newsize;
+        p->command_lengths = cl;
+        p->num_commands = nc;
+        p->async = async;
         return p;
     }
     int com_ind = 0;
@@ -89,7 +94,7 @@ Piper create_piper(char **command, int size_command)
         if (strcmp(newcommand[i], "|") == 0)
         {
             p->command_list[com_ind] = (char**) malloc((i-prev_ind+1)*sizeof(char*));
-            p->command_lengths[com_ind] = i - prev_ind + 1;
+            cl[com_ind] = i - prev_ind + 1;
             for (int j = 0; j < i-prev_ind; j++)
             {
                 p->command_list[com_ind][j] = command[prev_ind + j];
@@ -100,11 +105,14 @@ Piper create_piper(char **command, int size_command)
         }
     }
     p->command_list[com_ind] = (char**) malloc((newsize-prev_ind)*sizeof(char*));
-    p->command_lengths[com_ind] = newsize - prev_ind;
+    cl[com_ind] = newsize - prev_ind;
     for (int j = 0; j < newsize-prev_ind; j++)
     {
         p->command_list[com_ind][j] = command[prev_ind + j];
     }
+    p->command_lengths = cl;
+    p->num_commands = nc;
+    p->async = async;
     return p;
 }
 
@@ -168,7 +176,11 @@ int _run_sync_commands(Piper p)
         {
             if (p->num_commands == 1 || i == p->num_commands-1)
             {
-                spawn_synchronous_process(command, inpipe, outpipe, appipe, in, 1, false, true);
+                if (p->num_commands == 1)
+                {
+                    in = currpipe[0];
+                }
+                spawn_synchronous_process(command, inpipe, outpipe, appipe, in, currpipe[1], (i==0), true);
                 if (in != 0)
                 {
                     close(in);
@@ -176,18 +188,22 @@ int _run_sync_commands(Piper p)
                 close(currpipe[0]);
                 close(currpipe[1]);
             }
+            else if (i == 0)
+            {
+                spawn_synchronous_process(command, inpipe, outpipe, appipe, currpipe[0], currpipe[1], true, false);
+                in = currpipe[0];
+                close(currpipe[1]);
+                if ( pipe(currpipe) == -1 )
+                {
+                    fprintf(stderr, "Error: could not create pipe. Aborting command.\n");
+                    return -1;
+                }
+            }
             else
             {
-                spawn_synchronous_process(command, inpipe, outpipe, appipe, in, currpipe[1], (i==0), false);
-                if (in == 0)
-                {
-                    in = currpipe[0];
-                }
-                else
-                {
-                    close(in);
-                    in = currpipe[0];
-                }
+                spawn_synchronous_process(command, inpipe, outpipe, appipe, in, currpipe[1], false, false);
+                close(in);
+                in = currpipe[0];
                 close(currpipe[1]);
                 if ( pipe(currpipe) == -1 )
                 {
@@ -264,11 +280,11 @@ int _run_async_commands(Piper p)
 
 void free_piper(Piper p)
 {
-    free(p->command_lengths);
     for (int i = 0; i < p->num_commands; i++)
     {
         free(p->command_list[i]);
     }
     free(p->command_list);
+    free(p->command_lengths);
     free(p);
 }

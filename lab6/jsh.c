@@ -47,20 +47,33 @@ int main(int argc, char **argv)
     char *prompt;
     if (argc == 2)
     {
-        prompt = strdup(argv[1]);
+        if (strcmp(argv[1], "-") == 0)
+        {
+            prompt = strdup("");
+        }
+        else
+        {
+            prompt = strdup(argv[1]);
+        }
     }
     else
     {
         prompt = strdup("jsh:");
     }
     char buf[MAX_COMMAND_LEN];
-    printf("%s ", prompt);
+    if (strcmp(prompt, "") != 0)
+    {
+        printf("%s ", prompt);
+    }
     while (fgets(buf, MAX_COMMAND_LEN, stdin) != NULL)
     {
         char *input = trim_ws(buf);
         if (strcmp(input, "") == 0)
         {
-            printf("%s ", prompt);
+            if (strcmp(prompt, "") != 0)
+            {
+                printf("%s ", prompt);
+            }
             continue;
         }
         int num_coms = 0;
@@ -72,7 +85,10 @@ int main(int argc, char **argv)
         {
             break;
         }
-        printf("%s ", prompt);
+        if (strcmp(prompt, "") != 0)
+        {
+            printf("%s ", prompt);
+        }
     }
     free(prompt);
 }

@@ -54,7 +54,15 @@ void spawn_synchronous_process(char **newargv, const char *inpipe, const char *o
     pid = fork();
     if (pid == 0)
     {
-        if (infd != 0)
+        if (firstproc)
+        {
+            close(infd);
+        }
+        if (finalproc)
+        {
+            close(outfd);
+        }
+        if (infd != 0 && !firstproc)
         {
             if (dup2(infd, 0) < 0)
             {
@@ -63,7 +71,7 @@ void spawn_synchronous_process(char **newargv, const char *inpipe, const char *o
             }
             close(infd);
         }
-        if (outfd != 1)
+        if (outfd != 1 && !finalproc)
         {
             if (dup2(outfd, 1) < 0)
             {
@@ -110,7 +118,14 @@ void spawn_synchronous_process(char **newargv, const char *inpipe, const char *o
         }
         if (execvp(newargv[0], newargv) == -1)
         {
-            fprintf(stderr, "Error: created new process, but could not launch provided command.\n");
+            if ( access(newargv[0], F_OK) == -1 )
+            {
+                perror(newargv[0]);
+            }
+            else
+            {
+                fprintf(stderr, "Error: created new process, but could not launch provided command.\n");
+            }
             exit(-2);
         }
     }
@@ -155,12 +170,20 @@ void spawn_asynchronous_process(char **newargv, int num_coms, const char *inpipe
     pid = fork();
     if (pid == 0)
     {
-        if (infd != 0)
+        if (firstproc)
+        {
+            close(infd);
+        }
+        if (finalproc)
+        {
+            close(outfd);
+        }
+        if (infd != 0 && !firstproc)
         {
             dup2(infd, 0);
             close(infd);
         }
-        if (outfd != 1)
+        if (outfd != 1 && !finalproc)
         {
             dup2(outfd, 1);
             close(outfd);
