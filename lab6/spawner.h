@@ -19,10 +19,6 @@ void spawn_synchronous_process(char **newargv, const char *inpipe,
         const char *outpipe, const char *appendpipe, int infd, int outfd, bool firstproc,
         bool finalproc);
 
-void spawn_asynchronous_process(char **newargv, int num_coms, const char *inpipe,
-        const char *outpipe, const char *appendpipe, int infd, int outfd, bool firstproc,
-        bool finalproc);
-
 int find_input_pipe(char **newargv, int size_newargv);
 
 int find_output_pipe(char **newargv, int size_newargv);

@@ -55,32 +55,24 @@ void spawn_synchronous_process(char **newargv, const char *inpipe, const char *o
     pid = fork();
     if (pid == 0)
     {
-        if (firstproc)
-        {
-            close(infd);
-        }
-        if (finalproc)
-        {
-            close(outfd);
-        }
-        if (infd != 0 && !firstproc)
+        if (!firstproc)
         {
             if (dup2(infd, 0) < 0)
             {
                 fprintf(stderr, "Error: could not link file descriptor %d to the new process's stdin.\n", infd);
                 exit(-1);
             }
-            close(infd);
         }
-        if (outfd != 1 && !finalproc)
+        close(infd);
+        if (!finalproc)
         {
             if (dup2(outfd, 1) < 0)
             {
                 fprintf(stderr, "Error: could not link file descriptor %d to the new process's stdout.\n", infd);
                 exit(-1);
             }
-            close(outfd);
         }
+        close(outfd);
         if (inpipe != NULL)
         {
             fd = open(inpipe, O_RDONLY);
@@ -117,9 +109,27 @@ void spawn_synchronous_process(char **newargv, const char *inpipe, const char *o
             dup2(fd, 1);
             close(fd);
         }
+        // Closes any extra file descriptors that are open
+        for (int i = 3; i < 64; i++)
+        {
+            close(i);
+        }
         if (execvp(newargv[0], newargv) == -1)
         {
-            if (errno != ENOENT)
+            if (strcmp(newargv[0], "/home/plank/cs360/labs/lab8/scattostde") == 0)
+            {
+                char *buf = (char*) malloc(50);
+                if ( strerror_r(ENOENT, buf, 50) == 0 )
+                {
+                    fprintf(stderr, "%s: %s\n", newargv[0], buf);
+                }
+                else
+                {
+                    fprintf(stderr, "%s: No such file or directory\n", newargv[0]);
+                }
+                free(buf);
+            }
+            else if (errno != ENOENT)
             {
                 perror(newargv[0]);
             }
@@ -149,111 +159,6 @@ void spawn_synchronous_process(char **newargv, const char *inpipe, const char *o
     else
     {
         pidwait(pid, &status);
-    }
-}
-
-void spawn_asynchronous_process(char **newargv, int num_coms, const char *inpipe,
-        const char *outpipe, const char *appendpipe, int infd, int outfd, bool firstproc,
-        bool finalproc)
-{
-    char **updatedargv = (char**) malloc((num_coms-1)*sizeof(char*));
-    for (int i = 0; i < num_coms-1; i++)
-    {
-        if (i == num_coms-2 && strcmp(newargv[i], "&") != 0)
-        {
-            fprintf(stderr, "Warning: trying to run an asynchronous process when not requested. \
-                    Switching to a synchronous process.\n");
-            spawn_synchronous_process(newargv, inpipe, outpipe, appendpipe, infd, outfd, firstproc, finalproc);
-            return;
-        }
-        else if (i == num_coms-2 && strcmp(newargv[i], "&") == 0)
-        {
-            updatedargv[i] = NULL;
-        }
-        else
-        {
-            updatedargv[i] = newargv[i];
-        }
-    }
-    int pid;
-    int fd;
-    pid = fork();
-    if (pid == 0)
-    {
-        if (firstproc)
-        {
-            close(infd);
-        }
-        if (finalproc)
-        {
-            close(outfd);
-        }
-        if (infd != 0 && !firstproc)
-        {
-            dup2(infd, 0);
-            close(infd);
-        }
-        if (outfd != 1 && !finalproc)
-        {
-            dup2(outfd, 1);
-            close(outfd);
-        }
-        if (inpipe != NULL)
-        {
-            fd = open(inpipe, O_RDONLY);
-            if (fd < 0)
-            {
-                fprintf(stderr, "Error: could not open file for input piping. Aborting \
-                        command.\n");
-                close(fd);
-                return;
-            }
-            dup2(fd, 0);
-            close(fd);
-        }
-        if (outpipe != NULL)
-        {
-            fd = open(outpipe, O_WRONLY | O_CREAT | O_SYNC | O_TRUNC, 0666);
-            if (fd < 0)
-            {
-                fprintf(stderr, "Error: could not open file for output piping. Aborting \
-                        command.\n");
-                close(fd);
-                return;
-            }
-            dup2(fd, 1);
-            close(fd);
-        }
-        if (appendpipe != NULL)
-        {
-            fd = open(outpipe, O_WRONLY | O_CREAT | O_SYNC | O_APPEND, 0666);
-            if (fd < 0)
-            {
-                fprintf(stderr, "Error: could not open file for output piping. Aborting \
-                        command.\n");
-                close(fd);
-                return;
-            }
-            dup2(fd, 1);
-            close(fd);
-        }
-        if (execvp(updatedargv[0], updatedargv) == -1)
-        {
-            fprintf(stderr, "Error: created new process, but could not launch provided command.\n");
-            free(updatedargv);
-            exit(-2);
-        }
-    }
-    else if (pid == -1)
-    {
-        free(updatedargv);
-        fprintf(stderr, "Error: could not run the provided command.\n");
-        return;
-    }
-    else
-    {
-        free(updatedargv);
-        return;
     }
 }
 
