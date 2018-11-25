@@ -1,4 +1,5 @@
 #include "spawner.h"
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <fcntl.h>
@@ -118,13 +119,22 @@ void spawn_synchronous_process(char **newargv, const char *inpipe, const char *o
         }
         if (execvp(newargv[0], newargv) == -1)
         {
-            if ( access(newargv[0], F_OK) == -1 )
+            if (errno != ENOENT)
             {
                 perror(newargv[0]);
             }
             else
             {
-                fprintf(stderr, "Error: created new process, but could not launch provided command.\n");
+                char *buf = (char*) malloc(50);
+                if ( strerror_r(EACCES, buf, 50) == 0 )
+                {
+                    fprintf(stderr, "%s: %s\n", newargv[0], buf);
+                }
+                else
+                {
+                    fprintf(stderr, "%s: Permission denied\n", newargv[0]);
+                }
+                free(buf);
             }
             exit(-2);
         }
@@ -314,7 +324,5 @@ char** remove_single_pipe(char **newargv, int *size_newargv, int pipe_ind)
         }
     }
     *size_newargv -= 2;
-    free(newargv);
-    newargv = reducedargv;
     return reducedargv;
 }

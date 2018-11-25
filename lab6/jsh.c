@@ -81,6 +81,7 @@ int main(int argc, char **argv)
         Piper p = create_piper(command, num_coms);
         int ret = run_commands(p);
         free_piper(p);
+        free(command);
         if (ret == 1)
         {
             break;
