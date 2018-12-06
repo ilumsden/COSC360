@@ -27,6 +27,35 @@ void send_string(char *s, int fd)
     send_bytes(s, len, fd);
 }
 
+void shutdown(int sock)
+{
+    pthread_mutex_lock(mut);
+    for (int i = 0; i < num_connections + 1; i++)
+    {
+        if (pthread_cancel(threads[i]) != 0)
+        {
+            perror("Could not cancel thread. Resorting to exit.");
+        }
+    }
+    JRB ptr;
+    jrb_traverse(ptr, current_clients_by_fd)
+    {
+        Client cli = (Client) ptr->val.v;
+        close(cli->fd);
+        free_client(cli);
+    }
+    jrb_free_tree(current_clients);
+    jrb_free_tree(all_clients);
+    jrb_free_tree(current_clients_by_fd);
+    pthread_mutex_unlock(mut);
+    if (pthread_mutex_destroy(mut) != 0)
+    {
+        perror("Could not destroy mutex");
+    }
+    close(sock);
+    exit(0);
+}
+
 Client new_client(char *join_message, time_t t, int fd)
 {
     Client cli = (Client) malloc(sizeof(struct client_t));
@@ -111,7 +140,7 @@ void print_all_clients()
     pthread_mutex_unlock(mut);
 }
 
-void jtalk_console(void *v)
+void jtalk_console()
 {
     char command[10];
     printf("Jtalk_server_console> ");
@@ -131,7 +160,7 @@ void jtalk_console(void *v)
         }
     }
     fflush(stdout);
-    pthread_exit();
+    return;
 }
 
 void send_message_to_clients(char *msg)
@@ -213,4 +242,21 @@ void communicate_with_client(void *v)
     strcat(name, " has quit\n");
     send_message_to_clients(name);
     pthread_exit();
+}
+
+void accept_client_connections(void *v)
+{
+    int *sock_ptr = (int*) v;
+    int sock = *sock_ptr;
+    while (1)
+    {
+        int fd = accept_connection(sock);
+        pthread_mutex_lock(mut);
+        if (pthread_create(threads[num_connections+1], NULL, communicate_with_client, (void*) &fd) != 0)
+        {
+            perror("Could not create communication thread.");
+            close(fd);
+        }
+        pthread_mutex_unlock(mut);
+    }
 }

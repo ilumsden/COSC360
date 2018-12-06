@@ -8,15 +8,20 @@
 
 #include "jrb.h"
 
-static unsigned int num_connections = 0;
+#define MAX_THREADS 1000
+
+extern pthread_t threads[MAX_THREADS];
+extern unsigned int num_connections = 0;
 extern JRB current_clients = make_jrb();
 extern JRB all_clients = make_jrb();
-static JRB current_clients_by_fd = make_jrb();
 extern pthread_mutex_t *mut;
+static JRB current_clients_by_fd = make_jrb();
 
 void send_bytes(char *p, int len, int fd);
 
 void send_string(char *s, int fd);
+
+void shutdown(int sock);
 
 enum client_status_t
 {
@@ -50,8 +55,10 @@ void print_current_clients();
 
 void print_all_clients();
 
-void jtalk_console(void *v);
+void jtalk_console();
 
 void send_message_to_clients(char *msg);
 
-void communicate_with_client(Client cli);
+void communicate_with_client(void *v);
+
+void accept_client_connections(void *v);

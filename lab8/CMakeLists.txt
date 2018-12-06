@@ -14,20 +14,25 @@ endif()
 set(CMAKE_C_FLAGS "-Wall -g -O ${CMAKE_C_FLAGS}")
 
 file(GLOB lab8_src "${PROJECT_SOURCE_DIR}/*.c")
+list(REMOVE_ITEM lab8_src "jtalk.c")
 file(GLOB lab8_headers "${PROJECT_SOURCE_DIR}/*.h")
 
 set(SOCK_LIB "/home/plank/cs360/objs/socketfun.o")
 
 include_directories(/home/plank/cs360/include)
 
-add_executable(jtalk ${lab8_src} ${lab8_headers} ${SOCK_LIB})
+add_executable(jtalk_server ${lab8_src} ${lab8_headers} ${SOCK_LIB})
+add_executable(jtalk "jtalk.c" ${SOCK_LIB})
 
 find_package(Threads REQUIRED)
 if(THREADS_HAVE_PTHREAD_ARG)
     target_compile_options(jtalk PUBLIC "-pthread")
+    target_compile_options(jtalk_server PUBLIC "-pthread")
 endif()
 if(CMAKE_THREAD_LIBS_INIT)
     target_link_libraries(jtalk "${CMAKE_THREAD_LIBS_INIT}")
+    target_link_libraries(jtalk_server "${CMAKE_THREAD_LIBS_INIT}")
 endif()
 
-target_link_libraries(fakemake PRIVATE /home/plank/cs360/objs/libfdr.a)
+target_link_libraries(jtalk PRIVATE /home/plank/cs360/objs/libfdr.a)
+target_link_libraries(jtalk_server PRIVATE /home/plank/cs360/objs/libfdr.a)
