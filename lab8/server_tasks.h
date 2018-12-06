@@ -11,6 +11,12 @@
 static unsigned int num_connections = 0;
 static JRB current_clients = make_jrb();
 static JRB all_clients = make_jrb();
+static JRB current_clients_by_fd = make_jrb();
+static pthread_mutex_t *mut;
+
+void send_bytes(char *p, int len, int fd);
+
+void send_string(char *s, int fd);
 
 enum client_status_t
 {
@@ -29,16 +35,23 @@ typedef struct client_t
     char *talk_time;
     char *quit_time;
     client_status_t stat;
+    int fd;
 } *Client;
 
-Client new_client(char *join_message);
+Client new_client(char *join_message, time_t t, int fd);
 
 void print_client(Client cli, bool print_creation);
 
-void add_client(char *join_message);
+void add_client(char *join_message, time_t t, int fd);
+
+void free_client(Client cli);
 
 void print_current_clients();
 
 void print_all_clients();
 
-void jtalk_console();
+void jtalk_console(void *v);
+
+void send_message_to_clients(char *msg);
+
+void communicate_with_client(Client cli);
