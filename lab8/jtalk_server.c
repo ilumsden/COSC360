@@ -1,14 +1,7 @@
-/*
- * CS360:
- * Jim Plank
- */
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
+#include "server_tasks.h"
 #include "socketfun.h"
 
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
   int sock, fd;
 
