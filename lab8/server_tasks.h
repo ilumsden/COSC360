@@ -9,10 +9,10 @@
 #include "jrb.h"
 
 static unsigned int num_connections = 0;
-static JRB current_clients = make_jrb();
-static JRB all_clients = make_jrb();
+extern JRB current_clients = make_jrb();
+extern JRB all_clients = make_jrb();
 static JRB current_clients_by_fd = make_jrb();
-static pthread_mutex_t *mut;
+extern pthread_mutex_t *mut;
 
 void send_bytes(char *p, int len, int fd);
 
