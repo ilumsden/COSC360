@@ -1,6 +1,9 @@
 #include "server_tasks.h"
 #include "socketfun.h"
 
+extern char *host;
+extern int port;
+
 extern unsigned int num_clients;
 extern unsigned int num_connections;
 extern JRB current_clients;
@@ -23,6 +26,8 @@ int main(int argc, char **argv)
         fprintf(stderr, "usage: jtalk_server host port\n");
         exit(1);
     }
+    host = strdup(argv[1]);
+    port = atoi(argv[2]);
     sock = serve_socket(argv[1], atoi(argv[2]));
     pthread_mutex_lock(mut);
     if (pthread_create(&(threads[0]), NULL, accept_client_connections, (void*) &sock) != 0)

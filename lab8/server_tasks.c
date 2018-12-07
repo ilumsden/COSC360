@@ -1,5 +1,8 @@
 #include "server_tasks.h"
 
+extern char *host;
+extern int port;
+
 extern pthread_t threads[MAX_THREADS];
 extern unsigned int num_connections;
 extern unsigned int num_clients;
@@ -54,6 +57,7 @@ void shutdown(int sock)
     }
     jrb_free_tree(current_clients);
     jrb_free_tree(all_clients);
+    free(host);
     pthread_mutex_unlock(mut);
     if (pthread_mutex_destroy(mut) != 0)
     {
@@ -100,7 +104,7 @@ void print_client(Client cli, bool print_creation)
     }
     else
     {
-        printf("%-2d %12s  %s\n", cli->connection_id, cli->username, cli->stat);
+        printf("%-6d %-9s%s\n", cli->connection_id, cli->username, cli->stat);
         printf("   Joined      at %s", cli->creation_time);
         printf("   Last talked at %s", cli->talk_time);
         if (strcmp(cli->stat, "DEAD") == 0)
@@ -136,6 +140,7 @@ void print_current_clients()
 {
     JRB ptr;
     pthread_mutex_lock(mut);
+    printf("Jtalk server on %s port %d\n", host, port);
     jrb_traverse(ptr, current_clients)
     {
         Client cli = (Client) ptr->val.v;
@@ -148,6 +153,7 @@ void print_all_clients()
 {
     JRB ptr;
     pthread_mutex_lock(mut);
+    printf("Jtalk server on %s port %d\n", host, port);
     jrb_traverse(ptr, all_clients)
     {
         Client cli = (Client) ptr->val.v;

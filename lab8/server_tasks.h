@@ -10,6 +10,9 @@
 
 #define MAX_THREADS 1000
 
+char *host;
+int port;
+
 pthread_t threads[MAX_THREADS];
 unsigned int num_connections;
 unsigned int num_clients;
