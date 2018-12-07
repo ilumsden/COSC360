@@ -4,7 +4,6 @@ extern pthread_t threads[MAX_THREADS];
 extern unsigned int num_connections;
 extern JRB current_clients;
 extern JRB all_clients;
-extern JRB current_clients_by_fd;
 extern pthread_mutex_t *mut;
 
 void send_bytes_server(char *p, int len, int fd)
@@ -45,7 +44,7 @@ void shutdown(int sock)
         }
     }
     JRB ptr;
-    jrb_traverse(ptr, current_clients_by_fd)
+    jrb_traverse(ptr, all_clients)
     {
         Client cli = (Client) ptr->val.v;
         close(cli->fd);
@@ -53,7 +52,6 @@ void shutdown(int sock)
     }
     jrb_free_tree(current_clients);
     jrb_free_tree(all_clients);
-    jrb_free_tree(current_clients_by_fd);
     pthread_mutex_unlock(mut);
     if (pthread_mutex_destroy(mut) != 0)
     {
@@ -108,15 +106,17 @@ void print_client(Client cli, bool print_creation)
     }
 }
 
-void add_client(char *join_message, time_t t, int fd)
+int add_client(char *join_message, time_t t, int fd)
 {
+    int cid;
     Client cli = new_client(join_message, t, fd);
     pthread_mutex_lock(mut);
     num_connections++;
     jrb_insert_int(current_clients, (int) cli->connection_id, new_jval_v((void*) cli));
     jrb_insert_int(all_clients, (int) cli->connection_id, new_jval_v((void*) cli));
-    jrb_insert_int(current_clients_by_fd, fd, new_jval_v((void*) cli));
+    cid = cli->connection_id;
     pthread_mutex_unlock(mut);
+    return cid;
 }
 
 void free_client(Client cli)
@@ -196,6 +196,7 @@ void* communicate_with_client(void *v)
     bool first = true;
     char buf[1100];
     int num_bytes;
+    int cid;
     while ((num_bytes = read(fd, (void*) &msg_size, 4)) > 0)
     {
         time_t t = time(NULL);
@@ -219,13 +220,13 @@ void* communicate_with_client(void *v)
         buf[msg_size] = 0;
         if (first)
         {
-            add_client(buf, t, fd);
+            cid = add_client(buf, t, fd);
             first = false;
         }
         else
         {
             pthread_mutex_lock(mut);
-            Client cli = (Client) jrb_find_int(current_clients_by_fd, fd);
+            Client cli = (Client) jrb_find_int(current_clients, cid);
             if (cli == NULL)
             {
                 fprintf(stderr, "Error: couldn't find the client connected to file descriptor %d. Aborting.\n", fd);
@@ -246,17 +247,14 @@ void* communicate_with_client(void *v)
     }
     char *name;
     pthread_mutex_lock(mut);
-    JRB node = jrb_find_int(current_clients_by_fd, fd);
+    JRB node = jrb_find_int(current_clients, cid);
     Client cli = (Client) node->val.v;
-    unsigned int cid = cli->connection_id;
     name = (char*) malloc(strlen(cli->username) + 11);
     strcpy(name, cli->username);
     jrb_delete_node(node);
-    node = jrb_find_int(current_clients, (int) cid);
-    jrb_delete_node(node);
     strcpy(cli->stat, "DEAD");
-    pthread_mutex_unlock(mut);
     close(fd);
+    pthread_mutex_unlock(mut);
     strcat(name, " has quit\n");
     send_message_to_clients(name);
     pthread_exit(NULL);

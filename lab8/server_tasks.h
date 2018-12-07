@@ -14,7 +14,6 @@ pthread_t threads[MAX_THREADS];
 unsigned int num_connections;
 JRB current_clients;
 JRB all_clients;
-JRB current_clients_by_fd;
 pthread_mutex_t *mut;
 
 void send_bytes_server(char *p, int len, int fd);
@@ -41,7 +40,7 @@ Client new_client(char *join_message, time_t t, int fd);
 
 void print_client(Client cli, bool print_creation);
 
-void add_client(char *join_message, time_t t, int fd);
+int add_client(char *join_message, time_t t, int fd);
 
 void free_client(Client cli);
 

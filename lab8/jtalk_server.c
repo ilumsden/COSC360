@@ -4,7 +4,6 @@
 extern unsigned int num_connections;
 extern JRB current_clients;
 extern JRB all_clients;
-extern JRB current_clients_by_fd;
 extern pthread_mutex_t *mut;
 extern pthread_t threads[MAX_THREADS];
 
@@ -15,7 +14,6 @@ int main(int argc, char **argv)
     num_connections = 0;
     current_clients = make_jrb();
     all_clients = make_jrb();
-    current_clients_by_fd = make_jrb();
     pthread_mutex_init(mut, NULL);
     int sock;
     if (argc != 3) 
