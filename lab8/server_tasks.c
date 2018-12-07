@@ -1,6 +1,13 @@
 #include "server_tasks.h"
 
-void send_bytes(char *p, int len, int fd)
+extern pthread_t threads[MAX_THREADS];
+extern unsigned int num_connections;
+extern JRB current_clients;
+extern JRB all_clients;
+extern JRB current_clients_by_fd;
+extern pthread_mutex_t *mut;
+
+void send_bytes_server(char *p, int len, int fd)
 {
     char *ptr;
     int i;
@@ -18,13 +25,13 @@ void send_bytes(char *p, int len, int fd)
     }
 }
 
-void send_string(char *s, int fd)
+void send_string_server(char *s, int fd)
 {
     int len;
 
     len = strlen(s);
-    send_bytes((char *) &len, sizeof(int), fd);
-    send_bytes(s, len, fd);
+    send_bytes_server((char *) &len, sizeof(int), fd);
+    send_bytes_server(s, len, fd);
 }
 
 void shutdown(int sock)
@@ -76,7 +83,9 @@ Client new_client(char *join_message, time_t t, int fd)
     cli->creation_time = ctime(&t);
     cli->talk_time = ctime(&t);
     cli->quit_time = NULL;
-    cli->stat = active;
+    cli->stat = (char*) malloc(5);
+    cli->stat[0] = 0;
+    strcpy(cli->stat, "LIVE");
     cli->fd = fd;
     return cli;
 }
@@ -106,13 +115,14 @@ void add_client(char *join_message, time_t t, int fd)
     num_connections++;
     jrb_insert_int(current_clients, (int) cli->connection_id, new_jval_v((void*) cli));
     jrb_insert_int(all_clients, (int) cli->connection_id, new_jval_v((void*) cli));
-    jrb_insert_int(current_clients_by_fd, cli->fd, new_jval_v((void*) cli));
+    jrb_insert_int(current_clients_by_fd, fd, new_jval_v((void*) cli));
     pthread_mutex_unlock(mut);
 }
 
 void free_client(Client cli)
 {
     free(cli->username);
+    free(cli->stat);
     free(cli);
 }
 
@@ -122,7 +132,7 @@ void print_current_clients()
     pthread_mutex_lock(mut);
     jrb_traverse(ptr, current_clients)
     {
-        Client cli = (Client) ptr.val.v;
+        Client cli = (Client) ptr->val.v;
         print_client(cli, false);
     }
     pthread_mutex_unlock(mut);
@@ -134,7 +144,7 @@ void print_all_clients()
     pthread_mutex_lock(mut);
     jrb_traverse(ptr, all_clients)
     {
-        Client cli = (Client) ptr.val.v;
+        Client cli = (Client) ptr->val.v;
         print_client(cli, true);
     }
     pthread_mutex_unlock(mut);
@@ -144,8 +154,9 @@ void jtalk_console()
 {
     char command[10];
     printf("Jtalk_server_console> ");
-    while (read(stdin, command, 10) > 0)
+    while (read(0, command, 10) > 0)
     {
+        fflush(stdout);
         if (strcmp(command, "TALKERS") == 0)
         {
             print_current_clients();
@@ -169,13 +180,15 @@ void send_message_to_clients(char *msg)
     pthread_mutex_lock(mut);
     jrb_traverse(ptr, current_clients)
     {
-        Client cli = (Client) ptr.val.v;
-        send_string(msg, cli->fd);
+        Client cli = (Client) ptr->val.v;
+        printf("fd is %d\n", cli->fd);
+        printf("msg is %s\n", msg);
+        send_string_server(msg, cli->fd);
     }
     pthread_mutex_unlock(mut);
 }
 
-void communicate_with_client(void *v)
+void* communicate_with_client(void *v)
 {
     int *fdp = (int*) v;
     int fd = *fdp;
@@ -188,12 +201,12 @@ void communicate_with_client(void *v)
         time_t t = time(NULL);
         if (msg_size > 1099) 
         {
-            fprintf(stderr, "Receive string: string too small (%d vs %d)\n", len, size);
-            pthread_exit();
+            fprintf(stderr, "Receive string: string too small (%d vs %d)\n", msg_size, 1099);
+            pthread_exit(NULL);
         }
         char *msg = buf;
         int i;
-        while(msg < msg+msg_size) 
+        while(msg < buf+msg_size) 
         {
             i = read(fd, msg, buf-msg+msg_size);
             if (i == 0) exit(0);
@@ -203,6 +216,7 @@ void communicate_with_client(void *v)
             }
             msg += i;
         }
+        buf[msg_size] = 0;
         if (first)
         {
             add_client(buf, t, fd);
@@ -211,40 +225,44 @@ void communicate_with_client(void *v)
         else
         {
             pthread_mutex_lock(mut);
-            Client cli = jrb_find_str(current_clients_by_fd, fd);
+            Client cli = (Client) jrb_find_int(current_clients_by_fd, fd);
             if (cli == NULL)
             {
                 fprintf(stderr, "Error: couldn't find the client connected to file descriptor %d. Aborting.\n", fd);
                 close(fd);
-                pthread_exit();
+                pthread_exit(NULL);
             }
-            cli->talk_time = ctime(t);
+            cli->talk_time = ctime(&t);
             pthread_mutex_unlock(mut);
         }
         send_message_to_clients(buf);
+        strcpy(buf, "");
     }
     if (num_bytes != 0)
     {
         perror("Read error detected");
         close(fd);
-        pthread_exit();
+        pthread_exit(NULL);
     }
     char *name;
     pthread_mutex_lock(mut);
-    JRB node = jrb_find_str(current_clients_by_fd, fd);
-    Client cli = (Client) node.val.v;
+    JRB node = jrb_find_int(current_clients_by_fd, fd);
+    Client cli = (Client) node->val.v;
+    unsigned int cid = cli->connection_id;
     name = (char*) malloc(strlen(cli->username) + 11);
-    name = strcpy(cli->username);
+    strcpy(name, cli->username);
     jrb_delete_node(node);
-    free_client(cli);
+    node = jrb_find_int(current_clients, (int) cid);
+    jrb_delete_node(node);
+    strcpy(cli->stat, "DEAD");
     pthread_mutex_unlock(mut);
-    close(fd)
+    close(fd);
     strcat(name, " has quit\n");
     send_message_to_clients(name);
-    pthread_exit();
+    pthread_exit(NULL);
 }
 
-void accept_client_connections(void *v)
+void* accept_client_connections(void *v)
 {
     int *sock_ptr = (int*) v;
     int sock = *sock_ptr;
@@ -252,11 +270,12 @@ void accept_client_connections(void *v)
     {
         int fd = accept_connection(sock);
         pthread_mutex_lock(mut);
-        if (pthread_create(threads[num_connections+1], NULL, communicate_with_client, (void*) &fd) != 0)
+        if (pthread_create(&(threads[num_connections+1]), NULL, communicate_with_client, (void*) &fd) != 0)
         {
             perror("Could not create communication thread.");
             close(fd);
         }
         pthread_mutex_unlock(mut);
     }
+    pthread_exit(NULL);
 }

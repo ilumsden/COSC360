@@ -1,14 +1,12 @@
-/*
- * CS360:
- * Jim Plank
- */
-
 #include <stdlib.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include "socketfun.h"
 #include "fields.h"
+
+// The following includes were added to prevent issues. No other changes were made to this file.
+#include <unistd.h>
 
 send_bytes(char *p, int len, int fd)
 {

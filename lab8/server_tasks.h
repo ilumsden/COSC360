@@ -10,24 +10,18 @@
 
 #define MAX_THREADS 1000
 
-extern pthread_t threads[MAX_THREADS];
-extern unsigned int num_connections = 0;
-extern JRB current_clients = make_jrb();
-extern JRB all_clients = make_jrb();
-extern pthread_mutex_t *mut;
-static JRB current_clients_by_fd = make_jrb();
+pthread_t threads[MAX_THREADS];
+unsigned int num_connections;
+JRB current_clients;
+JRB all_clients;
+JRB current_clients_by_fd;
+pthread_mutex_t *mut;
 
-void send_bytes(char *p, int len, int fd);
+void send_bytes_server(char *p, int len, int fd);
 
-void send_string(char *s, int fd);
+void send_string_server(char *s, int fd);
 
 void shutdown(int sock);
-
-enum client_status_t
-{
-    active = "LIVE",
-    disconnected = "DEAD",
-};
 
 typedef struct client_t
 {
@@ -39,7 +33,7 @@ typedef struct client_t
     char *creation_time;
     char *talk_time;
     char *quit_time;
-    client_status_t stat;
+    char *stat;
     int fd;
 } *Client;
 
@@ -59,6 +53,6 @@ void jtalk_console();
 
 void send_message_to_clients(char *msg);
 
-void communicate_with_client(void *v);
+void* communicate_with_client(void *v);
 
-void accept_client_connections(void *v);
+void* accept_client_connections(void *v);
