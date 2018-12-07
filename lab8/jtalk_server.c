@@ -1,6 +1,7 @@
 #include "server_tasks.h"
 #include "socketfun.h"
 
+extern unsigned int num_clients;
 extern unsigned int num_connections;
 extern JRB current_clients;
 extern JRB all_clients;
@@ -12,6 +13,7 @@ int main(int argc, char **argv)
     pthread_mutex_t m;
     mut = &m;
     num_connections = 0;
+    num_clients = 0;
     current_clients = make_jrb();
     all_clients = make_jrb();
     pthread_mutex_init(mut, NULL);

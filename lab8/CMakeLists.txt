@@ -19,7 +19,8 @@ message(STATUS "Src files are ${lab8_src}")
 file(GLOB lab8_headers "${PROJECT_SOURCE_DIR}/*.h")
 
 #set(SOCK_LIB "/home/plank/cs360/objs/socketfun.o")
-set(LIB_FDR "/home/plank/cs360/objs/libfdr.a")
+add_library(libfdr SHARED "/home/plank/cs360/include/dllist.h" "/home/plank/cs360/include/fields.h" "/home/plank/cs360/include/jrb.h" "/home/plank/cs360/include/jval.h" "/home/plank/cs360/src/dllist.c" "/home/plank/cs360/src/fields.c" "/home/plank/cs360/src/jrb.c" "/home/plank/cs360/src/jval.c")
+#set(LIB_FDR "/home/plank/cs360/objs/libfdr.a")
 
 include_directories(/home/plank/cs360/include)
 
@@ -44,5 +45,7 @@ if(CMAKE_THREAD_LIBS_INIT)
     target_link_libraries(jtalk_server PRIVATE "${CMAKE_THREAD_LIBS_INIT}")
 endif()
 
-target_link_libraries(jtalk PRIVATE ${LIB_FDR})
-target_link_libraries(jtalk_server PRIVATE ${LIB_FDR})
+#target_link_libraries(jtalk PRIVATE ${LIB_FDR})
+#target_link_libraries(jtalk_server PRIVATE ${LIB_FDR})
+target_link_libraries(jtalk PRIVATE libfdr)
+target_link_libraries(jtalk_server PRIVATE libfdr)

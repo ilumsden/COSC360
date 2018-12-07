@@ -12,6 +12,7 @@
 
 pthread_t threads[MAX_THREADS];
 unsigned int num_connections;
+unsigned int num_clients;
 JRB current_clients;
 JRB all_clients;
 pthread_mutex_t *mut;

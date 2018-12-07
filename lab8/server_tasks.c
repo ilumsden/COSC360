@@ -2,6 +2,7 @@
 
 extern pthread_t threads[MAX_THREADS];
 extern unsigned int num_connections;
+extern unsigned int num_clients;
 extern JRB current_clients;
 extern JRB all_clients;
 extern pthread_mutex_t *mut;
@@ -36,7 +37,8 @@ void send_string_server(char *s, int fd)
 void shutdown(int sock)
 {
     pthread_mutex_lock(mut);
-    for (int i = 0; i < num_connections + 1; i++)
+    int i;
+    for (i = 0; i < num_connections + 1; i++)
     {
         if (pthread_cancel(threads[i]) != 0)
         {
@@ -65,7 +67,8 @@ Client new_client(char *join_message, time_t t, int fd)
 {
     Client cli = (Client) malloc(sizeof(struct client_t));
     int ind = 0;
-    for (int i = 0; i < (int) strlen(join_message); i++)
+    int i;
+    for (i = 0; i < (int) strlen(join_message); i++)
     {
         if (join_message[i] == ':')
         {
@@ -76,11 +79,12 @@ Client new_client(char *join_message, time_t t, int fd)
     char *name = (char*) malloc(ind+2);
     name[0] = 0;
     strncpy(name, join_message, ind);
+    name[ind+1] = 0;
     cli->username = name;
-    cli->connection_id = num_connections + 1;
+    cli->connection_id = num_clients + 1;
     cli->creation_time = ctime(&t);
     cli->talk_time = ctime(&t);
-    cli->quit_time = NULL;
+    cli->quit_time = ctime(&t);
     cli->stat = (char*) malloc(5);
     cli->stat[0] = 0;
     strcpy(cli->stat, "LIVE");
@@ -99,11 +103,12 @@ void print_client(Client cli, bool print_creation)
         printf("%-2d %12s  %s\n", cli->connection_id, cli->username, cli->stat);
         printf("   Joined      at %s", cli->creation_time);
         printf("   Last talked at %s", cli->talk_time);
-        if (cli->quit_time != NULL)
+        if (strcmp(cli->stat, "DEAD") == 0)
         {
             printf("   Quit        at %s", cli->quit_time);
         }
     }
+    fflush(stdout);
 }
 
 int add_client(char *join_message, time_t t, int fd)
@@ -112,6 +117,7 @@ int add_client(char *join_message, time_t t, int fd)
     Client cli = new_client(join_message, t, fd);
     pthread_mutex_lock(mut);
     num_connections++;
+    num_clients++;
     jrb_insert_int(current_clients, (int) cli->connection_id, new_jval_v((void*) cli));
     jrb_insert_int(all_clients, (int) cli->connection_id, new_jval_v((void*) cli));
     cid = cli->connection_id;
@@ -154,21 +160,32 @@ void jtalk_console()
 {
     char command[10];
     printf("Jtalk_server_console> ");
+    fflush(stdout);
     while (read(0, command, 10) > 0)
     {
-        fflush(stdout);
-        if (strcmp(command, "TALKERS") == 0)
+        if (command[0] == 'T')
+        {
+            command[8] = 0;
+        }
+        else
+        {
+            command[4] = 0;
+        }
+        if (strcmp(command, "TALKERS\n") == 0)
         {
             print_current_clients();
         }
-        else if (strcmp(command, "ALL") == 0)
+        else if (strcmp(command, "ALL\n") == 0)
         {
             print_all_clients();
         }
         else
         {
             printf("Unknown console command: %s\n", command);
+            fflush(stdout);
         }
+        printf("Jtalk_server_console> ");
+        fflush(stdout);
     }
     fflush(stdout);
     return;
@@ -181,8 +198,6 @@ void send_message_to_clients(char *msg)
     jrb_traverse(ptr, current_clients)
     {
         Client cli = (Client) ptr->val.v;
-        printf("fd is %d\n", cli->fd);
-        printf("msg is %s\n", msg);
         send_string_server(msg, cli->fd);
     }
     pthread_mutex_unlock(mut);
@@ -226,7 +241,7 @@ void* communicate_with_client(void *v)
         else
         {
             pthread_mutex_lock(mut);
-            Client cli = (Client) jrb_find_int(current_clients, cid);
+            Client cli = (Client) jrb_find_int(current_clients, cid)->val.v;
             if (cli == NULL)
             {
                 fprintf(stderr, "Error: couldn't find the client connected to file descriptor %d. Aborting.\n", fd);
@@ -245,15 +260,32 @@ void* communicate_with_client(void *v)
         close(fd);
         pthread_exit(NULL);
     }
+    time_t t = time(NULL);
     char *name;
     pthread_mutex_lock(mut);
     JRB node = jrb_find_int(current_clients, cid);
     Client cli = (Client) node->val.v;
     name = (char*) malloc(strlen(cli->username) + 11);
+    name[0] = 0;
     strcpy(name, cli->username);
     jrb_delete_node(node);
     strcpy(cli->stat, "DEAD");
+    cli->quit_time = ctime(&t);
     close(fd);
+    pthread_t id = pthread_self();
+    for (int i = 0; i < num_connections+1; i++)
+    {
+        if (i != 0 && threads[i] == id)
+        {
+            for (int j = i+1; j < num_connections+1; j++)
+            {
+                threads[j-1] = threads[j];
+            }
+            threads[num_connections] = 0;
+            break;
+        }
+    }
+    num_connections--;
     pthread_mutex_unlock(mut);
     strcat(name, " has quit\n");
     send_message_to_clients(name);
